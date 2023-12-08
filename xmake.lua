@@ -31,6 +31,7 @@ add_requires("boost", {configs = {json = true, thread = true, context = true, pr
 
 add_requires("abseil")
 add_requires("libaio", {system=false})  -- , configs = {shared = false}
+add_requires("libcurl", {system=false, configs = {shared = false}})
 
 -- sudo apt install libssl-dev
 if not is_plat("windows") then

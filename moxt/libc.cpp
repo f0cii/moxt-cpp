@@ -1,4 +1,5 @@
 #include "libc.hpp"
+#include "common.hpp"
 #include "fixed_12.hpp"
 #include "moxt/utils/floatutil.hpp"
 #include <absl/strings/ascii.h>
@@ -20,6 +21,8 @@
 #include <openssl/err.h>
 #include <openssl/opensslv.h>
 #include <snmalloc/override/new.cc>
+#define ANKERL_NANOBENCH_IMPLEMENT
+#include <nanobench.h>
 
 using std23::nontype;
 
