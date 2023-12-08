@@ -31,5 +31,8 @@
 *.out
 *.app
 
+.cache/
 .xmake/
 build/
+CMakeLists.txt
+compile_commands.json
