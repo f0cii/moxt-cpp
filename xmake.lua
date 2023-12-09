@@ -19,6 +19,7 @@ end
 add_requires("fast_float_local", {alias = 'fast_float'})
 add_requires("fmt", {configs = {header_only = true}})
 add_requires("fmtlog-local", {alias = 'fmtlog'})
+add_requires("spdlog")
 add_requires("nanobench")
 add_requires("concurrentqueue")
 add_requires("nanoid-cpp-local", {alias = 'nanoid-cpp'})

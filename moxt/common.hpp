@@ -25,7 +25,13 @@
 #undef min
 #endif
 
-#include <fmtlog/fmtlog.h>
+// #include <fmtlog/fmtlog.h>
+#include <spdlog/spdlog.h>
+
+#define logd spdlog::debug
+#define logi spdlog::info
+#define logw spdlog::warn
+#define loge spdlog::error
 
 #define SEQ_FUNC extern "C"
 

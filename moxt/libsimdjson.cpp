@@ -340,16 +340,29 @@ seq_simdjson_ondemand_array_iter_free(ondemand::array_iterator *p) {
 // DOM
 
 SEQ_FUNC dom::parser *seq_simdjson_dom_parser_new(size_t max_capacity) {
-    return mem_new<dom::parser>(max_capacity);
+    logd("seq_simdjson_dom_parser_new max_capacity={}", max_capacity);
+    //auto ret = mem_new<dom::parser>(max_capacity);
+    auto ret = new dom::parser(max_capacity);
+    logd("seq_simdjson_dom_parser_new max_capacity={} OK", max_capacity);
+    return ret;
 }
 
 SEQ_FUNC void seq_simdjson_dom_parser_free(dom::parser *parser) {
-    mem_delete<dom::parser>(parser);
+    // mem_delete<dom::parser>(parser);
+    delete parser;
 }
 
 SEQ_FUNC dom::element *
 seq_simdjson_dom_parser_parse(dom::parser *parser, const char *s, size_t len) {
-    return mem_dup<dom::element>(parser->parse(std::string_view(s, len)));
+    logd("seq_simdjson_dom_parser_parse");
+    if (parser == nullptr) {
+        logd("seq_simdjson_dom_parser_parse parser == nullptr");
+    }
+    logd("seq_simdjson_dom_parser_parse body={} len={}",
+         std::string_view(s, len), len);
+    auto ret = mem_dup<dom::element>(parser->parse(std::string_view(s, len)));
+    logd("seq_simdjson_dom_parser_parse ok");
+    return ret;
 }
 
 SEQ_FUNC void seq_simdjson_dom_element_free(dom::element *p) {
