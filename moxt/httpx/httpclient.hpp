@@ -110,6 +110,9 @@ class HttpClient {
 
         logd("client.connect {}:{}", host_, port_);
 
+        // Set a timeout on the operation
+        beast::get_lowest_layer(*ssl_stream_).expires_after(connectTimeout_);
+
         auto ep = tcp::resolver(AsioIOC::default_pool().getIOContext())
                       .resolve(host_, port_); // "https"
 
@@ -122,9 +125,6 @@ class HttpClient {
             loge("Failed to set SNI Hostname for {}", host_.c_str());
             return false;
         }
-
-        // Set a timeout on the operation
-        beast::get_lowest_layer(*ssl_stream_).expires_after(connectTimeout_);
 
         beast::error_code ec;
         // Make the connection on the IP address we get from a lookup

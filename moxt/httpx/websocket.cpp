@@ -1,11 +1,11 @@
-#include "WebSocket.hpp"
+#include "websocket.hpp"
 #include <unordered_map>
 #include <utility>
 
 void on_message_null(WebSocket *ws, const char *data, size_t len) {}
 
 WebSocket::WebSocket(std::string host, std::string port, std::string path,
-                       asio::io_context &ioContext, int tls_version)
+                     asio::io_context &ioContext, int tls_version)
     : host(std::move(host)), port(std::move(port)), path(std::move(path)),
       _ioContext(ioContext), _resolver(asio::make_strand(_ioContext)),
       _sslContext(asio::ssl::context::tlsv12_client),
@@ -41,7 +41,7 @@ void WebSocket::Connect() {
 }
 
 void WebSocket::OnResolve(beast::error_code ec,
-                           asio::ip::tcp::resolver::results_type results) {
+                          asio::ip::tcp::resolver::results_type results) {
     logd("WebSocket::OnResolve");
 
     if (ec) {
@@ -217,8 +217,8 @@ void WebSocket::OnReconnect(beast::error_code ec) {
 void WebSocket::Read() {
     // logvd("WebSocket::Read");
 
-    _websocket->async_read(
-        _buffer, beast::bind_front_handler(&WebSocket::OnRead, this));
+    _websocket->async_read(_buffer,
+                           beast::bind_front_handler(&WebSocket::OnRead, this));
 }
 
 void WebSocket::OnRead(beast::error_code ec, std::size_t bytes_transferred) {
@@ -273,9 +273,8 @@ void WebSocket::OnRead(beast::error_code ec, std::size_t bytes_transferred) {
 void WebSocket::Write(std::string const &data) {
     // logvd("WebSocket::Write");
 
-    _websocket->async_write(
-        asio::buffer(data),
-        beast::bind_front_handler(&WebSocket::OnWrite, this));
+    _websocket->async_write(asio::buffer(data), beast::bind_front_handler(
+                                                    &WebSocket::OnWrite, this));
 }
 
 void WebSocket::OnWrite(beast::error_code ec, size_t bytes_transferred) {

@@ -2,6 +2,7 @@
 
 #include "libthread.hpp"
 #include "moxt/httpx/asio_ioc.hpp"
+#include "moxt/httpx/websocket.hpp"
 #include <photon/net/http/client.h>
 #include <photon/net/http/message.h>
 #include <photon/net/http/verb.h>

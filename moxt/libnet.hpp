@@ -2,9 +2,14 @@
 #define MOXT_LIBNET_HPP
 
 #include "common.hpp"
-#include "moxt/httpx/WebSocket.hpp"
 
 enum NetDriverType { STD_THREAD = 0, PHOTON = 1 };
+
+class WebSocket;
+
+typedef void (*OnConnectCallback)(WebSocket *ws);
+typedef void (*OnHeartbeatCallback)(WebSocket *ws);
+typedef void (*OnMessageCallback)(WebSocket *ws, const char *data, size_t len);
 
 // 启动asio
 SEQ_FUNC void seq_asio_run();

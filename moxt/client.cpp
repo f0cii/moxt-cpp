@@ -38,15 +38,6 @@ int64_t Client::doRequest(const char *path, size_t path_len, int64_t verb,
     request_.set(http::field::user_agent, "ct/1.0.1");
 
     // request_.set(http::field::content_type, "application/json");
-    // if (body_len > 0) {
-    //     if (debug) {
-    //         logd("body_len={}", body_len);
-    //         logd("body={}", std::string(body, body_len));
-    //     }
-    //     // request_.set(http::field::content_length,
-    //     fmt::to_string(body_len));
-    //     // request_.body() = std::string(body, body_len);
-    // }
 
     if (body_len > 0) {
         request_.set(http::field::content_type, "application/json");
@@ -56,26 +47,15 @@ int64_t Client::doRequest(const char *path, size_t path_len, int64_t verb,
     }
 
     if (headers != nullptr) {
-        // printf("doRequest 4\n");
         logd("--------------header--------------");
         for (auto &a : *headers) {
             logd("{}={}", a.first, a.second);
             request_.set(a.first, a.second);
         }
     }
-    // if (body_len > 0) {
-    //     logd("body_len={}", body_len);
-    //     logd("body={}", std::string(body, body_len));
-    //     request_.set(http::field::content_length, fmt::to_string(body_len));
-    //     request_.body() = std::string(body, body_len);
-    // }
-
-    // printf("Client::doRequest 10000\n");
 
     auto client = connPool->acquire();
     if (client == nullptr) {
-        // printf("Client::doRequest 10001\n");
-        // printf("doRequest 5\n");
         // 构造错误响应结果
         const char *msg = "Failed to acquire client";
         auto len = strlen(msg);
@@ -84,13 +64,9 @@ int64_t Client::doRequest(const char *path, size_t path_len, int64_t verb,
         return 404;
     }
 
-    // printf("Client::doRequest 10002\n");
-
     size_t bufferSize = 0; // 1024*64;
     auto response = client->performRequest(request_, bufferSize);
-    // printf("Client::doRequest 10003\n");
     connPool->release(client);
-    // printf("Client::doRequest 10004\n");
 
     auto resBody = &response.body();
 
@@ -101,9 +77,7 @@ int64_t Client::doRequest(const char *path, size_t path_len, int64_t verb,
     // printf("Client::doRequest len: %ld\n", len);
 
     set_body(res, resBody->c_str(), len);
-    // printf("Client::doRequest set_body\n");
     *n = len;
-    // printf("Client::doRequest set n\n");
     return response.result_int();
 }
 

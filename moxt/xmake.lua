@@ -39,6 +39,7 @@ target("moxt")
 
 	add_packages("fmt")
 	add_packages("fmtlog")
+	add_packages("spdlog")
 	add_packages("abseil")
 	add_packages("simdjson")
 	add_packages("double-conversion")
