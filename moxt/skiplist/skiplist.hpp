@@ -110,7 +110,7 @@ void SkipList<K, V>::createNode(int level, Node<K, V> *&node, K key, V value) {
 template <typename K, typename V> void SkipList<K, V>::freeList() {
     Node<K, V> *p = header;
     Node<K, V> *q;
-    while (p != NULL) {
+    while (p != NULL && p != footer) {
         q = p->forward[0];
         delete p;
         p = q;
