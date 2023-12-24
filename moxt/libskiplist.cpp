@@ -9,11 +9,11 @@ SEQ_FUNC skiplist_t *seq_skiplist_new(bool isForward) {
         // auto f = fixed_12_new_string("100000.0");
         // printf("f: %ld\n", f.fp);
         // printf("fs: %s\n", fixed_12_string(f).c_str());
-        return new skiplist_t(f.fp, true);
+        return new skiplist_t(f, true);
     } else {
         auto f = fixed_12_new_string("0.0");
         // printf("f: %ld\n", f.fp);
-        return new skiplist_t(f.fp, false);
+        return new skiplist_t(f, false);
     }
 }
 
@@ -33,7 +33,7 @@ SEQ_FUNC int64_t seq_skiplist_remove(skiplist_t *list, int64_t key) {
     if (ok) {
         return value;
     } else {
-        return fixed_12_zero.fp;
+        return fixed_12_zero;
     }
 }
 
@@ -42,7 +42,7 @@ SEQ_FUNC int64_t seq_skiplist_search(skiplist_t *list, int64_t key) {
     if (node != nullptr) {
         return node->getValue();
     } else {
-        return fixed_12_zero.fp;
+        return fixed_12_zero;
     }
 }
 

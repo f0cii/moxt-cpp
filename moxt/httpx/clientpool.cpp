@@ -43,7 +43,7 @@ class HttpClientPoolImpl : public HttpClientPool {
     std::string port_;
     ssl::context::method method_ = ssl::context::tlsv13_client;
 
-    photon::thread *collector;
+    photon::thread *collector = nullptr;
     // photon::Timer timer;
     void collect();
 };
@@ -57,20 +57,19 @@ HttpClientPool *HttpClientPool::make(std::string host, std::string port,
 HttpClientPoolImpl::HttpClientPoolImpl(std::string host, std::string port,
                                        ssl::context::method method)
     : host_(host), port_(port), pool_(12), closedPool_(12), method_(method) {
-    logi("HttpClientPoolImpl::HttpClientPoolImpl");
-    // collector = (photon::thread *)photon::thread_enable_join(
-    //     photon::thread_create11(&HttpClientPoolImpl::collect, this));
-
-    // collector = photon::thread_create11(&HttpClientPoolImpl::collect, this);
-    // seq_photon_thread_migrate_to_work_pool(collector);
+    logd("HttpClientPoolImpl::HttpClientPoolImpl");
+    collector = photon::thread_create11(&HttpClientPoolImpl::collect, this);
+    seq_photon_thread_migrate_to_work_pool(collector);
 }
 
 HttpClientPoolImpl::~HttpClientPoolImpl() {
     logi("HttpClientPoolImpl::~HttpClientPoolImpl");
-    auto th = collector;
-    collector = nullptr;
-    photon::thread_interrupt((photon::thread *)th);
-    photon::thread_join((photon::join_handle *)th);
+    if (collector != nullptr) {
+        auto th = collector;
+        collector = nullptr;
+        photon::thread_interrupt((photon::thread *)th);
+        photon::thread_join((photon::join_handle *)th);
+    }
     logi("HttpClientPoolImpl::~HttpClientPoolImpl stop");
     // 清理连接池
     HttpClient *client = nullptr;
@@ -119,6 +118,9 @@ HttpClient *HttpClientPoolImpl::acquire() {
 
 // 释放连接
 void HttpClientPoolImpl::release(HttpClient *client) {
+    if (client == nullptr) {
+        return;
+    }
     if (client->isConnected()) {
         pool_.push(client);
     } else {

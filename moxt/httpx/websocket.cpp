@@ -1,8 +1,10 @@
 #include "websocket.hpp"
-#include <unordered_map>
-#include <utility>
 
-void on_message_null(WebSocket *ws, const char *data, size_t len) {}
+void on_connect_null(WebSocket *ws) {}
+void on_heartbeat_null(WebSocket *ws) {}
+void on_message_null(WebSocket *ws, const char *data, size_t len) {
+    logd("on_message_null: {}", std::string_view(data, len));
+}
 
 WebSocket::WebSocket(std::string host, std::string port, std::string path,
                      asio::io_context &ioContext, int tls_version)
@@ -10,9 +12,10 @@ WebSocket::WebSocket(std::string host, std::string port, std::string path,
       _ioContext(ioContext), _resolver(asio::make_strand(_ioContext)),
       _sslContext(asio::ssl::context::tlsv12_client),
       _reconnectTimer(_ioContext), m_HeartbeatTimer(_ioContext),
-      m_HeartbeatInterval(), on_connect_callback_(nullptr),
-      on_heartbeat_callback_(nullptr), on_message_callback_(on_message_null) {
-    logd("WebSocket::WebSocket");
+      m_HeartbeatInterval(), on_connect_callback_(on_connect_null),
+      on_heartbeat_callback_(on_heartbeat_null),
+      on_message_callback_(on_message_null) {
+    // logd("WebSocket::WebSocket");
     //   SSL_CTX *handle = ::SSL_CTX_new(::TLS_method());
     //   // SSL_CTX_set_min_proto_version(handle, TLS1_2_VERSION);
     SSL_CTX_set_min_proto_version(_sslContext.native_handle(), TLS1_1_VERSION);
@@ -25,7 +28,7 @@ WebSocket::WebSocket(std::string host, std::string port, std::string path,
                             boost::asio::ssl::context::no_sslv2 |
                             boost::asio::ssl::context::no_sslv3 |
                             boost::asio::ssl::context::single_dh_use);
-    logd("WebSocket::WebSocket success");
+    // logd("WebSocket::WebSocket success");
 }
 
 WebSocket::~WebSocket() {
@@ -154,9 +157,9 @@ void WebSocket::OnHandshake(beast::error_code ec) {
     Read();
 
     // 触发连接回调
-    if (on_connect_callback_ != nullptr) {
-        on_connect_callback_(this);
-    }
+    // if (on_connect_callback_ != nullptr) {
+    on_connect_callback_(this);
+    // }
 
     m_HeartbeatInterval = std::chrono::seconds(10);
     DoHeartbeat({});
@@ -306,9 +309,9 @@ void WebSocket::DoHeartbeat(beast::error_code ec) {
     }
 
     // 触发心跳的方法
-    if (on_heartbeat_callback_ != nullptr) {
-        on_heartbeat_callback_(this);
-    }
+    // if (on_heartbeat_callback_ != nullptr) {
+    on_heartbeat_callback_(this);
+    // }
 
     m_HeartbeatTimer.expires_from_now(m_HeartbeatInterval);
     m_HeartbeatTimer.async_wait(

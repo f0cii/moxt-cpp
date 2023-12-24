@@ -1,15 +1,13 @@
-﻿#ifndef __CTCLIENT_H__
-#define __CTCLIENT_H__
+﻿#ifndef MOXT_CLIENT_HPP
+#define MOXT_CLIENT_HPP
 
 #include "common.hpp"
 #include "moxt/httpx/clientpool.hpp"
 #include "moxt/httpx/httpbase.hpp"
 #include "moxt/httpx/httpclient.hpp"
-#include <cstdint>
+#include <photon/common/identity-pool.h>
 
 using namespace std;
-
-typedef std::chrono::system_clock Clock;
 
 class Client {
   public:
@@ -21,6 +19,14 @@ class Client {
     explicit Client(string baseUrl, ssl::context::method method);
 
     ~Client();
+
+    CHttpResponse doRequestSync(const std::string &path, HttpVerb verb,
+                                std::map<std::string, std::string> &headers,
+                                const std::string &body, bool debug);
+
+    CHttpResponse doRequest(const std::string &path, HttpVerb verb,
+                            std::map<std::string, std::string> &headers,
+                            const std::string &body, bool debug);
 
     // 执行请求的统一方法
     int64_t doRequest(const char *path, size_t path_len, int64_t verb,
@@ -48,9 +54,7 @@ SEQ_FUNC Client *seq_client_new(const char *baseUrl, size_t baseUrl_len,
                                 int64_t method);
 SEQ_FUNC void seq_client_free(Client *client);
 
-// const char *path, int64_t verb, std::map<std::string, std::string> *headers,
-// const char *body, size_t body_len
-SEQ_FUNC int64_t seq_client_do_request(Client *client, SeqHttpRequest *reqeust,
+SEQ_FUNC int64_t seq_client_do_request(Client *client, SeqHttpRequest *request,
                                        char *res, size_t *n);
 SEQ_FUNC void seq_c_free(char *res);
 

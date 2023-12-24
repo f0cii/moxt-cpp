@@ -1,5 +1,5 @@
 #include "libsample.hpp"
-#include "common.hpp"
+// #include "common.hpp"
 
 SEQ_FUNC int seq_add(int a, int b) { return a + b; }
 
@@ -8,10 +8,11 @@ SEQ_FUNC int seq_add_callback(int a, int b, SeqAddCallbackFunc callback) {
 }
 
 SEQ_FUNC int seq_add_with_exception0(int a, int b) {
-    auto c = 1 / 0;
+    auto c = 1 / 100;
     return c;
 }
 
 SEQ_FUNC int seq_add_with_exception1(int a, int b) {
-    throw std::runtime_error("error 1000");
+    // throw std::runtime_error("error 1000");
+    return 0;
 }

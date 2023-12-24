@@ -50,7 +50,8 @@ SEQ_FUNC int seq_photon_init_default() {
     // set_log_output_level(ALOG_INFO);
     set_log_output(log_output_null);
 
-    int ret = photon::init(photon::INIT_EVENT_DEFAULT, photon::INIT_IO_NONE);
+    // int ret = photon::init(photon::INIT_EVENT_DEFAULT, photon::INIT_IO_NONE);
+    int ret = photon::init(photon::INIT_EVENT_DEFAULT, photon::INIT_IO_LIBCURL);
     // int ret = photon::init(photon::INIT_EVENT_DEFAULT,
     // photon::INIT_IO_LIBAIO);
     if (ret != 0) {

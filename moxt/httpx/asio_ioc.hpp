@@ -2,10 +2,9 @@
 // Created by ken on 2023/7/24.
 //
 
-#ifndef MOXT_ASIO_IOC_HPP
-#define MOXT_ASIO_IOC_HPP
+#pragma once
 
-#include "common.hpp"
+#include "moxt/common.hpp"
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/context.hpp>
@@ -44,5 +43,3 @@ class AsioIOC {
     boost::asio::io_context io_context_;
     std::unique_ptr<boost::asio::io_context::work> work_;
 };
-
-#endif // MOXT_ASIO_IOC_HPP

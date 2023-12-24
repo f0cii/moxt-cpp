@@ -6,7 +6,7 @@ package("nanoid-cpp-local")
 
     add_urls("https://github.com/mcmikecreations/nanoid_cpp.git")
 
-    on_install("windows", "linux", "macosx", "android", "iphoneos", "cross", function (package)
+    on_install("windows", "linux", "mingw", "macosx", "android", "iphoneos", "cross", function (package)
         local configs = {
             "-DBUILD_TESTS=OFF",
             "-DBUILD_EXAMPLES=OFF",

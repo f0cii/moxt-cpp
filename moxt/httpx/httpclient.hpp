@@ -1,23 +1,12 @@
 ﻿#ifndef __HTTPX_H__
 #define __HTTPX_H__
 
-//#include "common.hpp"
+#include "moxt/common.hpp"
 #include <atomic>
 #include <optional>
 
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
-#include <boost/beast.hpp>
-#include <boost/beast/core/multi_buffer.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/http/empty_body.hpp>
-#include <boost/beast/http/fields.hpp>
-#include <boost/beast/http/message.hpp>
-#include <boost/beast/http/string_body.hpp>
-#include <boost/beast/ssl.hpp>
-#include <boost/beast/version.hpp>
+#include "moxt/httpx/httpbase.hpp"
 
-#include "libthread.hpp"
 #include <photon/photon.h>
 #include <photon/thread/thread-pool.h>
 #include <photon/thread/thread.h>
@@ -26,6 +15,7 @@
 #include <photon/thread/workerpool.h>
 
 #include "moxt/httpx/asio_ioc.hpp"
+#include "moxt/libthread.hpp"
 
 using namespace std::chrono_literals;
 namespace net = boost::asio;
@@ -63,7 +53,7 @@ class HttpClient {
     std::string host_;
     std::string port_;
     std::optional<beast::ssl_stream<beast::tcp_stream>> ssl_stream_;
-    beast::flat_buffer buffer_;
+    // beast::flat_buffer buffer_;
     // 连接超时时间
     std::chrono::milliseconds connectTimeout_{5000};
     // 请求超时时间
@@ -83,7 +73,7 @@ class HttpClient {
         : ctx_(ctx), host_(host), port_(port),
           ssl_stream_(std::in_place, AsioIOC::default_pool().getIOContext(),
                       ctx_) {
-        logi("HttpClient::HttpClient()");
+        logd("HttpClient::HttpClient()");
     }
 
     /// <summary>
@@ -105,7 +95,7 @@ class HttpClient {
     /// <summary>
     /// 连接
     /// </summary>
-    bool connect() {
+    bool connect_v0() {
         connected = false;
 
         logd("client.connect {}:{}", host_, port_);
@@ -151,6 +141,87 @@ class HttpClient {
     }
 
     /// <summary>
+    /// 连接
+    /// </summary>
+    bool connect() {
+        connected = false;
+
+        logd("client.connect {}:{}", host_, port_);
+
+        // Set SNI Hostname (many hosts need this to handshake successfully)
+        if (!SSL_set_tlsext_host_name(ssl_stream_->native_handle(),
+                                      host_.data())) {
+            // beast::error_code ec{static_cast<int>(::ERR_get_error()),
+            // net::error::get_ssl_category()}; throw beast::system_error{ec};
+            loge("Failed to set SNI Hostname for {}", host_.c_str());
+            return false;
+        }
+
+        // Set a timeout on the operation
+        beast::get_lowest_layer(*ssl_stream_).expires_after(connectTimeout_);
+
+        auto resolver = tcp::resolver(AsioIOC::default_pool().getIOContext());
+        auto ep = resolver.resolve(host_, port_);
+        // auto ep = tcp::resolver(AsioIOC::default_pool().getIOContext())
+        //               .resolve(host_, port_); // "https"
+
+        // Create a timer for timeout
+        // net::steady_timer timer(AsioIOC::default_pool().getIOContext());
+        // timer.expires_after(connectTimeout_);
+
+        photon::condition_variable writeCompleted;
+
+        // Start an asynchronous connect operation
+        beast::get_lowest_layer(*ssl_stream_)
+            .async_connect(
+                ep, [this, &writeCompleted](
+                        const boost::system::error_code &ec,
+                        const tcp::resolver::results_type::endpoint_type &) {
+                    if (!ec) {
+                        // Successful connection
+                        logd("Successful connection");
+                        connected = true;
+                    } else {
+                        loge("Failed to connect to {} for {}", host_,
+                             ec.message());
+                        connected = false;
+                    }
+
+                    // Cancel the timer, as the operation has completed
+                    // timer.cancel();
+                    writeCompleted.notify_one();
+                });
+
+        writeCompleted.wait_no_lock(1000 * 1000 * 10); // 5s us
+
+        logd("connect [{}]", connected.load());
+
+        if (!connected) {
+            return false;
+        }
+
+        // beast::error_code ec;
+        // // Make the connection on the IP address we get from a lookup
+        // beast::get_lowest_layer(*ssl_stream_).connect(ep, ec);
+        // if (ec) {
+        //     loge("Failed to connect to {} for {}", ep->host_name(),
+        //          ec.message());
+        //     return false;
+        // }
+
+        beast::error_code ec;
+        ssl_stream_->handshake(ssl::stream_base::client, ec);
+        if (ec) {
+            loge("Failed to handshake to {} for {}", ep->host_name(),
+                 ec.message());
+            return false;
+        }
+
+        connected = true;
+        return true;
+    }
+
+    /// <summary>
     /// 断开连接
     /// </summary>
     void disconnect() {
@@ -175,12 +246,6 @@ class HttpClient {
     }
 
     /// <summary>
-    ///
-    /// </summary>
-    /// <param name="size"></param>
-    void reserveBufferSize(size_t size) { buffer_.reserve(size); }
-
-    /// <summary>
     /// 计算缓冲区大小
     /// </summary>
     /// <param name="sizeInKB"></param>
@@ -195,8 +260,7 @@ class HttpClient {
     /// <param name="request"></param>
     /// <param name="bufferSize"></param>
     /// <returns></returns>
-    inline Response performRequest(const Request &request,
-                                   size_t bufferSize = 0) {
+    inline Response performRequest(const Request &request) {
         if (!connected) {
             if (connect()) {
                 logi("Successfully connected to {} for {}",
@@ -228,14 +292,8 @@ class HttpClient {
 
         Response response;
 
-        if (bufferSize > 0) {
-            beast::flat_buffer buffer;
-            buffer.reserve(bufferSize);
-            beast::http::read(*ssl_stream_, buffer, response, ec);
-        } else {
-            buffer_.consume(buffer_.size());
-            beast::http::read(*ssl_stream_, buffer_, response, ec);
-        }
+        beast::flat_buffer buffer;
+        beast::http::read(*ssl_stream_, buffer, response, ec);
 
         if (ec) {
             loge("Failed to read response for {}", ec.message());
@@ -254,27 +312,16 @@ class HttpClient {
         auto &s = *ssl_stream_;
         // get_lowest_layer(s).expires_after(requestTimeout_);
 
-        photon::condition_variable writeCompleted;
-        std::pair<boost::system::error_code, size_t> writeResult;
-        auto writeCallback = [&writeCompleted,
-                              &writeResult](auto ec, auto size) mutable {
-            writeResult = std::make_pair(ec, size);
-            writeCompleted.notify_one();
-        };
-        http::async_write(s, request, writeCallback);
-        writeCompleted.wait_no_lock(1000 * 1000 * 10); // 5s us
-
-        // Check for errors in the first async_write
-        if (writeResult.first) {
-            // Handle error, log, set error state, etc.
-            throw std::runtime_error("Error in async_write: " +
-                                     writeResult.first.message());
+        beast::error_code ec;
+        beast::http::write(*ssl_stream_, request, ec);
+        if (ec) {
+            connected = false;
+            throw std::runtime_error("Failed to write request for " +
+                                     ec.message());
         }
 
-        buffer_.consume(buffer_.size());
-
         photon::condition_variable readCompleted;
-        Response res;
+        Response response;
         std::pair<boost::system::error_code, size_t> readResult;
 
         auto readCallback = [&readCompleted, &readResult](auto ec,
@@ -282,8 +329,10 @@ class HttpClient {
             readResult = std::make_pair(ec, size);
             readCompleted.notify_one();
         };
-        http::async_read(s, buffer_, res, readCallback);
-        readCompleted.wait_no_lock(1000 * 1000 * 10);
+
+        beast::flat_buffer buffer;
+        http::async_read(s, buffer, response, readCallback);
+        readCompleted.wait_no_lock(1000 * 1000 * 5);
 
         // Check for errors in the async_read
         if (readResult.first) {
@@ -292,7 +341,7 @@ class HttpClient {
                                      readResult.first.message());
         }
 
-        return res;
+        return response;
     }
 };
 

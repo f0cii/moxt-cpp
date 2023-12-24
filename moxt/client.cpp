@@ -1,6 +1,8 @@
 ﻿#include "client.hpp"
-#include "absl/container/internal/compressed_tuple.h"
 #include "moxt/utils/url_utils.hpp"
+#include "photon/net/curl.h"
+#include <cstdint>
+#include <photon/photon.h>
 
 Client::Client(string baseUrl, ssl::context::method method) : baseUrl(baseUrl) {
     // logd("Client baseUrl={}", baseUrl);
@@ -10,7 +12,6 @@ Client::Client(string baseUrl, ssl::context::method method) : baseUrl(baseUrl) {
 
     this->host = host;
 
-    // connPool = HttpClientPool::make(host, port, ssl::context::tlsv12_client);
     connPool = HttpClientPool::make(host, port, method);
     logd("Client.ctor");
 }
@@ -25,6 +26,82 @@ inline void set_body(char *res, const char *s, size_t len) {
     res[len] = '\0';
 }
 
+CHttpResponse Client::doRequestSync(const std::string &path, HttpVerb verb,
+                                    std::map<std::string, std::string> &headers,
+                                    const std::string &body, bool debug) {
+    HttpRequest request_{verb, path, 11};
+
+    request_.set(http::field::host, host);
+    request_.set(http::field::user_agent, "xt/1.0.1");
+
+    // request_.set(http::field::content_type, "application/json");
+
+    if (body.length() > 0) {
+        request_.set(http::field::content_type, "application/json");
+        request_.set(http::field::content_length, fmt::to_string(body.size()));
+        request_.body() = body;
+    }
+
+    // logd("--------------header--------------");
+    for (auto &a : headers) {
+        // logd("{}={}", a.first, a.second);
+        request_.set(a.first, a.second);
+    }
+
+    auto client = connPool->acquire();
+    DEFER(connPool->release(client));
+    if (client == nullptr) {
+        // logw("Failed to acquire client");
+        return CHttpResponse{400, "Failed to acquire client"};
+    }
+
+    auto response = client->performRequest(request_);
+
+    auto status_code = static_cast<uint64_t>(response.result_int());
+    return CHttpResponse{status_code, response.body()};
+}
+
+CHttpResponse Client::doRequest(const std::string &path, HttpVerb verb,
+                                std::map<std::string, std::string> &headers,
+                                const std::string &body, bool debug) {
+    HttpRequest request_{verb, path, 11};
+
+    request_.set(http::field::host, host);
+    request_.set(http::field::user_agent, "xt/1.0.1");
+
+    // request_.set(http::field::content_type, "application/json");
+
+    if (body.length() > 0) {
+        request_.set(http::field::content_type, "application/json");
+        request_.set(http::field::content_length, fmt::to_string(body.size()));
+        request_.body() = body;
+    }
+
+    // logd("--------------header--------------");
+    for (auto &a : headers) {
+        // logd("{}={}", a.first, a.second);
+        request_.set(a.first, a.second);
+    }
+
+    auto client = connPool->acquire();
+    DEFER(connPool->release(client));
+    if (client == nullptr) {
+        // logw("Failed to acquire client");
+        return CHttpResponse{400, "Failed to acquire client"};
+    }
+    try {
+        auto response = client->performRequestAsync(request_);
+        auto status_code = static_cast<uint64_t>(response.result_int());
+        return CHttpResponse{status_code, response.body()};
+    } catch (std::exception &e) {
+        loge("{}", e.what());
+        return CHttpResponse{500, e.what()};
+    } catch (...) {
+        loge("Error");
+        return CHttpResponse{500, "error"};
+    }
+}
+
 int64_t Client::doRequest(const char *path, size_t path_len, int64_t verb,
                           std::map<std::string, std::string> *headers,
                           const char *body, size_t body_len, char *res,
@@ -35,7 +112,7 @@ int64_t Client::doRequest(const char *path, size_t path_len, int64_t verb,
     HttpRequest request_{verb_, path_, 11};
 
     request_.set(http::field::host, host);
-    request_.set(http::field::user_agent, "ct/1.0.1");
+    request_.set(http::field::user_agent, "xt/1.0.1");
 
     // request_.set(http::field::content_type, "application/json");
 
@@ -47,9 +124,9 @@ int64_t Client::doRequest(const char *path, size_t path_len, int64_t verb,
     }
 
     if (headers != nullptr) {
-        logd("--------------header--------------");
+        // logd("--------------header--------------");
         for (auto &a : *headers) {
-            logd("{}={}", a.first, a.second);
+            // logd("{}={}", a.first, a.second);
             request_.set(a.first, a.second);
         }
     }
@@ -64,8 +141,7 @@ int64_t Client::doRequest(const char *path, size_t path_len, int64_t verb,
         return 404;
     }
 
-    size_t bufferSize = 0; // 1024*64;
-    auto response = client->performRequest(request_, bufferSize);
+    auto response = client->performRequest(request_);
     connPool->release(client);
 
     auto resBody = &response.body();
@@ -99,16 +175,16 @@ SEQ_FUNC void seq_client_free(Client *client) {
     client = nullptr;
 }
 
-SEQ_FUNC int64_t seq_client_do_request(Client *client, SeqHttpRequest *reqeust,
+SEQ_FUNC int64_t seq_client_do_request(Client *client, SeqHttpRequest *request,
                                        char *res, size_t *n) {
     // printf("seq_client_do_request\n");
-    std::string path(reqeust->path, reqeust->path_len);
+    std::string path(request->path, request->path_len);
     // printf("seq_client_do_request path=%s\n", path.c_str());
-    // printf("seq_client_do_request verb=%ld\n", reqeust->verb);
-    if (reqeust->body_len > 0) {
-        std::string body(reqeust->body, reqeust->body_len);
+    // printf("seq_client_do_request verb=%ld\n", request->verb);
+    if (request->body_len > 0) {
+        // std::string body(request->body, request->body_len);
         // printf("seq_client_do_request body=%s\n", body.c_str());
-        // printf("seq_client_do_request body_len=%ld\n", reqeust->body_len);
+        // printf("seq_client_do_request body_len=%ld\n", request->body_len);
     }
     // const char *a =
     //     "trings_internal -labsl_flags_program_name -labsl_int128 "
@@ -130,9 +206,9 @@ SEQ_FUNC int64_t seq_client_do_request(Client *client, SeqHttpRequest *reqeust,
     // strcpy(res, a);
     logi("seq_client_do_request");
     auto result = client->doRequest(
-        reqeust->path, reqeust->path_len, reqeust->verb,
-        static_cast<std::map<std::string, std::string> *>(reqeust->headers),
-        reqeust->body, reqeust->body_len, res, n, reqeust->debug);
+        request->path, request->path_len, request->verb,
+        static_cast<std::map<std::string, std::string> *>(request->headers),
+        request->body, request->body_len, res, n, request->debug);
     logi("seq_client_do_request success");
     return result;
 }

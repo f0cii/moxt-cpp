@@ -5,7 +5,7 @@
 #ifndef MOXT_WATCHDOG_HPP
 #define MOXT_WATCHDOG_HPP
 
-#include "common.hpp"
+#include "moxt/common.hpp"
 #include <boost/asio.hpp>
 #include <functional>
 

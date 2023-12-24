@@ -1,19 +1,9 @@
 #pragma once
 
-#include "common.hpp"
-#include <chrono>
+#include "moxt/common.hpp"
+#include "moxt/httpx/httpbase.hpp"
 #include <functional>
-#include <map>
-#include <memory>
-#include <string>
-#include <thread>
-
-#include <boost/asio/steady_timer.hpp>
-#include <boost/asio/strand.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/ssl.hpp>
-#include <boost/beast/websocket.hpp>
-#include <boost/beast/websocket/ssl.hpp>
+#include <std23/function_ref.h>
 
 // 参考以下代码实现:
 namespace asio = boost::asio;
@@ -21,19 +11,29 @@ namespace beast = boost::beast;
 
 class WebSocket;
 
-typedef void (*OnConnectCallback)(WebSocket *ws);
-typedef void (*OnHeartbeatCallback)(WebSocket *ws);
-typedef void (*OnMessageCallback)(WebSocket *ws, const char *data, size_t len);
+// using std23::function_ref;
+// using std23::nontype;
+
+// typedef void (*OnConnectCallback)(WebSocket *ws);
+// typedef void (*OnHeartbeatCallback)(WebSocket *ws);
+// typedef void (*OnMessageCallback)(WebSocket *ws, const char *data, size_t
+// len);
+
+class WebSocket;
+
+typedef std23::function_ref<void(WebSocket *ws)> OnConnectCallback;
+typedef std23::function_ref<void(WebSocket *ws)> OnHeartbeatCallback;
+typedef std23::function_ref<void(WebSocket *ws, const char *data, size_t len)>
+    OnMessageCallback;
 
 class WebSocket {
   public:
     ~WebSocket();
 
-  private: // variables
+  private:
     const int LARGE_THRESHOLD_NUMBER = 100;
 
     asio::io_context &_ioContext;
-    // std::unique_ptr<std::thread> _netThread;
     asio::ip::tcp::resolver _resolver;
     asio::ssl::context _sslContext;
     using SslStream_t = beast::ssl_stream<beast::tcp_stream>;
@@ -46,7 +46,6 @@ class WebSocket {
 
     beast::multi_buffer _buffer;
 
-    // std::string _apiToken;
     std::string host;
     std::string port;
     std::string path;
@@ -54,7 +53,6 @@ class WebSocket {
     std::string m_SessionId;
     asio::steady_timer m_HeartbeatTimer;
     std::chrono::steady_clock::duration m_HeartbeatInterval;
-    // std::multimap<Event, EventCallback_t> m_EventMap;
 
     OnConnectCallback on_connect_callback_;
     OnMessageCallback on_message_callback_;

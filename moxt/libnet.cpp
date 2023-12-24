@@ -2,7 +2,10 @@
 
 #include "libthread.hpp"
 #include "moxt/httpx/asio_ioc.hpp"
+#include "moxt/httpx/httpbase.hpp"
+#include "moxt/httpx/httpclient.hpp"
 #include "moxt/httpx/websocket.hpp"
+#include <photon/net/curl.h>
 #include <photon/net/http/client.h>
 #include <photon/net/http/message.h>
 #include <photon/net/http/verb.h>
@@ -11,6 +14,7 @@
 #include <photon/thread/thread.h>
 #include <photon/thread/thread11.h>
 #include <photon/thread/workerpool.h>
+#include <time.h>
 #include <type_traits>
 
 using namespace photon::net;
@@ -44,17 +48,17 @@ SEQ_FUNC void seq_websocket_send(WebSocket *p, const char *text, size_t len) {
 }
 
 SEQ_FUNC void seq_websocket_set_on_connect(WebSocket *p,
-                                           OnConnectCallback callback) {
+                                           OnConnectCallback_t callback) {
     p->set_on_connect(callback);
 }
 
 SEQ_FUNC void seq_websocket_set_on_heartbeat(WebSocket *p,
-                                             OnHeartbeatCallback callback) {
+                                             OnHeartbeatCallback_t callback) {
     p->set_on_heartbeat(callback);
 }
 
 SEQ_FUNC void seq_websocket_set_on_message(WebSocket *p,
-                                           OnMessageCallback callback) {
+                                           OnMessageCallback_t callback) {
     p->set_on_message(callback);
 }
 
@@ -203,4 +207,58 @@ SEQ_FUNC void test_photon_http(const char *url, size_t url_len) {
     //         break;
     //     }
     // }
+}
+
+class StringStream {
+    std::string s;
+
+  public:
+    std::string &str() { return s; }
+
+    size_t write(void *c, size_t n) {
+        // LOG_DEBUG("CALL WRITE");
+        s.append((char *)c, n);
+        return n;
+    }
+};
+
+void test_curl() {
+    for (int i = 0; i < 10; i++) {
+        clock_t start, end;
+        start = clock();
+        StringStream buffer;
+        // client->set_redirect(10).set_verbose(true);
+        // client.append_header("const std::string &key", const std::string
+        // &val)
+        photon::net::cURL client;
+        client.GET("https://api.bybit.com/v3/public/time", &buffer);
+        end = clock();
+        logi("{} ms, {}", double(end - start) / CLOCKS_PER_SEC * 1000.0,
+             buffer.str().c_str());
+        client.reset();
+    }
+    // buffer.reset();
+    // client.reset();
+}
+
+void test_httpclient() {
+    ssl::context ctx(ssl::context::tlsv13_client);
+    ctx.set_default_verify_paths();
+    std::string host = "api.bybit.com";
+    std::string port = "443";
+    httpx::HttpClient client(ctx, host, port);
+    for (int i = 0; i < 10; i++) {
+        clock_t start, end;
+        start = clock();
+        // httpx::Request request;
+        std::string path = "/v3/public/time";
+        beast::http::request<beast::http::string_body> request{HttpVerb::get, path, 11};
+
+        request.set(beast::http::field::host, host);
+        request.set(beast::http::field::user_agent, "xt/1.0.1");
+        auto res = client.performRequest(request);
+        end = clock();
+        logi("{} ms, {}", double(end - start) / CLOCKS_PER_SEC * 1000.0,
+             res.body().c_str());
+    }
 }
