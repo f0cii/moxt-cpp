@@ -13,13 +13,14 @@ add_repositories("my-repo-local myrepo")
 add_requires("simdjson-local", {alias = 'simdjson'})
 
 if not is_plat("windows") then
-	add_requires("libbacktrace")
+	-- add_requires("libbacktrace")
 end
 
 add_requires("fast_float_local", {alias = 'fast_float'})
 add_requires("fmt", {configs = {header_only = true}})
-add_requires("fmtlog-local", {alias = 'fmtlog'})
-add_requires("spdlog")
+-- add_requires("fmtlog-local", {alias = 'fmtlog'})
+-- add_requires("spdlog")
+add_requires("quill-local", {alias = 'quill'})
 add_requires("nanobench")
 add_requires("concurrentqueue")
 add_requires("nanoid-cpp-local", {alias = 'nanoid-cpp'})
@@ -47,12 +48,17 @@ if not is_plat("windows") then
 end
 
 add_requires("asio")
+-- add_requires("libuv-local", {alias = 'libuv'})
 add_requires("libuv")
 add_requires("snmalloc-local", {alias = 'snmalloc'})
+add_requires("parallel-hashmap-local", {alias = 'parallel-hashmap'})
 add_requires("spscqueue")
 add_requires("mpmcqueue")
 add_requires("nontype_functional")
 add_requires("yyjson-local", {alias = 'yyjson'})
+add_requires("sonic-cpp-local", {alias = 'sonic-cpp'})
+add_requires("toml++")
+add_requires("uwebsockets")
 
 -- include subprojects
 includes("*/*xmake.lua")
