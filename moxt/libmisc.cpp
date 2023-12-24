@@ -12,7 +12,6 @@
 #include <cstddef>
 #include <exception>
 #include <nanobench.h>
-#include <photon/common/callback.h>
 #include <photon/common/identity-pool.h>
 #include <tuple>
 
@@ -21,16 +20,15 @@
 #include "moxt/app.hpp"
 #include "moxt/httpx/asio_ioc.hpp"
 #include "moxt/utils/idgen.hpp"
-#include "spdlog/common.h"
 #include <csignal>
 #include <execinfo.h>
 #include <iostream>
 
+#include "moxt/utils/cast.hpp"
 #include <openssl/err.h>
 #include <openssl/opensslv.h>
 #include <snmalloc/override/new.cc>
 #include <snmalloc/snmalloc.h>
-#include <spdlog/spdlog.h>
 
 static int _constructor(int **ptr) {
     // printf("_constructor 10\n");
@@ -189,7 +187,7 @@ SEQ_FUNC int seq_ct_init() {
     SSL_library_init();
 
     // 设置信号处理程序
-    signal(SIGSEGV, handler);
+    // signal(SIGSEGV, handler);
 
     app_init();
 
@@ -326,7 +324,7 @@ SEQ_FUNC void seq_test_hmac_sha256(const char *secretKey, size_t secretKey_len,
 }
 
 SEQ_FUNC int64_t seq_strtoi(const char *s, size_t s_len) {
-    return stringToInt64(std::string_view(s, s_len));
+    return strtoi(std::string_view(s, s_len));
 }
 
 SEQ_FUNC double seq_strtod(const char *s, size_t s_len) {
@@ -334,11 +332,11 @@ SEQ_FUNC double seq_strtod(const char *s, size_t s_len) {
 }
 
 SEQ_FUNC void seq_test_spdlog() {
-    spdlog::set_level(spdlog::level::debug);
-    spdlog::info("Welcome to spdlog!");
-    spdlog::error("Some error message with arg: {}", 1);
-    std::string hello = "hello";
-    std::string_view sv = "hello";
-    spdlog::error("Some error message with arg: {}, {}", hello, sv);
-    spdlog::info(hello);
+    // spdlog::set_level(spdlog::level::debug);
+    // spdlog::info("Welcome to spdlog!");
+    // spdlog::error("Some error message with arg: {}", 1);
+    // std::string hello = "hello";
+    // std::string_view sv = "hello";
+    // spdlog::error("Some error message with arg: {}, {}", hello, sv);
+    // spdlog::info(hello);
 }

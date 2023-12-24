@@ -6,9 +6,9 @@
 
 /**
  Read a JSON string.
- 
+
  This function is thread-safe.
- 
+
  @param dat The JSON data (UTF-8 without BOM), null-terminator is not required.
     If this parameter is NULL, the function will fail and return NULL.
  @param len The length of JSON data in bytes.
@@ -18,9 +18,8 @@
  @return A new JSON document, or NULL if an error occurs.
     When it's no longer needed, it should be freed with `yyjson_doc_free()`.
  */
-SEQ_FUNC yyjson_doc *seq_yyjson_read(const char *dat,
-                                          size_t len,
-                                          yyjson_read_flag flg) {
+SEQ_FUNC yyjson_doc *seq_yyjson_read(const char *dat, size_t len,
+                                     yyjson_read_flag flg) {
     return yyjson_read(dat, len, flg);
 }
 
@@ -40,9 +39,7 @@ SEQ_FUNC size_t seq_yyjson_doc_get_val_count(yyjson_doc *doc) {
     return yyjson_doc_get_val_count(doc);
 }
 
-SEQ_FUNC void seq_yyjson_doc_free(yyjson_doc *doc) {
-    yyjson_doc_free(doc);
-}
+SEQ_FUNC void seq_yyjson_doc_free(yyjson_doc *doc) { yyjson_doc_free(doc); }
 
 /*==============================================================================
  * JSON Object API
@@ -57,9 +54,9 @@ SEQ_FUNC size_t seq_yyjson_obj_size(yyjson_val *obj) {
 /** Returns the value to which the specified key is mapped.
     Returns NULL if this object contains no mapping for the key.
     Returns NULL if `obj/key` is NULL, or type is not object.
-    
+
     The `key` should be a null-terminated UTF-8 string.
-    
+
     @warning This function takes a linear search time. */
 SEQ_FUNC yyjson_val *seq_yyjson_obj_get(yyjson_val *obj, const char *key) {
     return yyjson_obj_get(obj, key);
@@ -68,17 +65,15 @@ SEQ_FUNC yyjson_val *seq_yyjson_obj_get(yyjson_val *obj, const char *key) {
 /** Returns the value to which the specified key is mapped.
     Returns NULL if this object contains no mapping for the key.
     Returns NULL if `obj/key` is NULL, or type is not object.
-    
+
     The `key` should be a UTF-8 string, null-terminator is not required.
     The `key_len` should be the length of the key, in bytes.
-    
+
     @warning This function takes a linear search time. */
 SEQ_FUNC yyjson_val *seq_yyjson_obj_getn(yyjson_val *obj, const char *key,
-                                              size_t key_len) {
+                                         size_t key_len) {
     return yyjson_obj_getn(obj, key, key_len);
 }
-
-
 
 /** Returns the JSON value's type.
     Returns YYJSON_TYPE_NONE if `val` is NULL. */
@@ -131,9 +126,7 @@ SEQ_FUNC int64_t seq_yyjson_get_sint(yyjson_val *val) {
 
 /** Returns the content and cast to int.
     Returns 0 if `val` is NULL or type is not integer(sint/uint). */
-SEQ_FUNC int seq_yyjson_get_int(yyjson_val *val) {
-    return yyjson_get_int(val);
-}
+SEQ_FUNC int seq_yyjson_get_int(yyjson_val *val) { return yyjson_get_int(val); }
 
 /** Returns the content if the value is real number, or 0.0 on error.
     Returns 0.0 if `val` is NULL or type is not real(double). */
@@ -169,7 +162,7 @@ SEQ_FUNC bool seq_yyjson_equals_str(yyjson_val *val, const char *str) {
     The `str` should be a UTF-8 string, null-terminator is not required.
     Returns false if input is NULL or type is not string. */
 SEQ_FUNC bool seq_yyjson_equals_strn(yyjson_val *val, const char *str,
-                                          size_t len) {
+                                     size_t len) {
     return yyjson_equals_strn(val, str, len);
 }
 
@@ -185,8 +178,7 @@ SEQ_FUNC bool seq_yyjson_equals(yyjson_val *lhs, yyjson_val *rhs) {
 /** Set the value to raw.
     Returns false if input is NULL or `val` is object or array.
     @warning This will modify the `immutable` value, use with caution. */
-SEQ_FUNC bool seq_yyjson_set_raw(yyjson_val *val,
-                                      const char *raw, size_t len) {
+SEQ_FUNC bool seq_yyjson_set_raw(yyjson_val *val, const char *raw, size_t len) {
     return yyjson_set_raw(val, raw, len);
 }
 
@@ -242,8 +234,8 @@ SEQ_FUNC bool seq_yyjson_set_str(yyjson_val *val, const char *str) {
 /** Set the value to string (with length).
     Returns false if input is NULL or `val` is object or array.
     @warning This will modify the `immutable` value, use with caution. */
-SEQ_FUNC bool seq_yyjson_set_strn(yyjson_val *val,
-                                       const char *str, size_t len) {
+SEQ_FUNC bool seq_yyjson_set_strn(yyjson_val *val, const char *str,
+                                  size_t len) {
     return yyjson_set_strn(val, str, len);
 }
 
@@ -285,7 +277,7 @@ SEQ_FUNC yyjson_val *seq_yyjson_arr_get_last(yyjson_val *arr) {
 
 /**
  A JSON object iterator.
- 
+
  @par Example
  @code
     yyjson_val *key, *val;
@@ -299,27 +291,26 @@ SEQ_FUNC yyjson_val *seq_yyjson_arr_get_last(yyjson_val *arr) {
 
 /**
  Initialize an iterator for this object.
- 
+
  @param obj The object to be iterated over.
     If this parameter is NULL or not an object, `iter` will be set to empty.
  @param iter The iterator to be initialized.
     If this parameter is NULL, the function will fail and return false.
  @return true if the `iter` has been successfully initialized.
- 
+
  @note The iterator does not need to be destroyed.
  */
-SEQ_FUNC bool seq_yyjson_obj_iter_init(yyjson_val *obj,
-                                            yyjson_obj_iter *iter) {
+SEQ_FUNC bool seq_yyjson_obj_iter_init(yyjson_val *obj, yyjson_obj_iter *iter) {
     return yyjson_obj_iter_init(obj, iter);
 }
 
 /**
  Create an iterator with an object, same as `yyjson_obj_iter_init()`.
- 
+
  @param obj The object to be iterated over.
     If this parameter is NULL or not an object, an empty iterator will returned.
  @return A new iterator for the object.
- 
+
  @note The iterator does not need to be destroyed.
  */
 SEQ_FUNC yyjson_obj_iter seq_yyjson_obj_iter_with(yyjson_val *obj) {
@@ -352,22 +343,22 @@ SEQ_FUNC yyjson_val *seq_yyjson_obj_iter_get_val(yyjson_val *key) {
 
 /**
  Iterates to a specified key and returns the value.
- 
+
  This function does the same thing as `yyjson_obj_get()`, but is much faster
  if the ordering of the keys is known at compile-time and you are using the same
  order to look up the values. If the key exists in this object, then the
  iterator will stop at the next key, otherwise the iterator will not change and
  NULL is returned.
- 
+
  @param iter The object iterator, should not be NULL.
  @param key The key, should be a UTF-8 string with null-terminator.
  @return The value to which the specified key is mapped.
     NULL if this object contains no mapping for the key or input is invalid.
- 
+
  @warning This function takes a linear search time if the key is not nearby.
  */
 SEQ_FUNC yyjson_val *seq_yyjson_obj_iter_get(yyjson_obj_iter *iter,
-                                                  const char *key) {
+                                             const char *key) {
     return yyjson_obj_iter_get(iter, key);
 }
 
@@ -379,18 +370,17 @@ SEQ_FUNC yyjson_val *seq_yyjson_obj_iter_get(yyjson_obj_iter *iter,
  order to look up the values. If the key exists in this object, then the
  iterator will stop at the next key, otherwise the iterator will not change and
  NULL is returned.
- 
+
  @param iter The object iterator, should not be NULL.
  @param key The key, should be a UTF-8 string, null-terminator is not required.
  @param key_len The the length of `key`, in bytes.
  @return The value to which the specified key is mapped.
     NULL if this object contains no mapping for the key or input is invalid.
- 
+
  @warning This function takes a linear search time if the key is not nearby.
  */
 SEQ_FUNC yyjson_val *seq_yyjson_obj_iter_getn(yyjson_obj_iter *iter,
-                                                   const char *key,
-                                                   size_t key_len) {
+                                              const char *key, size_t key_len) {
     return yyjson_obj_iter_getn(iter, key, key_len);
 }
 
@@ -406,31 +396,28 @@ SEQ_FUNC yyjson_val *seq_unsafe_yyjson_get_next(yyjson_val *val) {
     return unsafe_yyjson_get_next(val);
 }
 
-SEQ_FUNC yyjson_obj_iter* seq_yyjson_obj_iter_ptr_new(yyjson_val *obj) {
-    yyjson_obj_iter* iter_ptr = (yyjson_obj_iter*)malloc(sizeof(yyjson_obj_iter));
+SEQ_FUNC yyjson_obj_iter *seq_yyjson_obj_iter_ptr_new(yyjson_val *obj) {
+    yyjson_obj_iter *iter_ptr =
+        (yyjson_obj_iter *)malloc(sizeof(yyjson_obj_iter));
     yyjson_obj_iter_init(obj, iter_ptr);
     return iter_ptr;
 }
 
-SEQ_FUNC void seq_yyjson_obj_iter_ptr_free(yyjson_obj_iter* iter_ptr) {
+SEQ_FUNC void seq_yyjson_obj_iter_ptr_free(yyjson_obj_iter *iter_ptr) {
     free(iter_ptr);
 }
 
 SEQ_FUNC void seq_yyjson_obj_foreach_test(yyjson_val *obj) {
     size_t idx, max;
     yyjson_val *key, *val;
-    for ((idx) = 0, \
-        (max) = yyjson_obj_size(obj), \
-        (key) = (obj) ? unsafe_yyjson_get_first(obj) : NULL, \
-        (val) = (key) + 1; \
-        (idx) < (max); \
-        (idx)++, \
-        (key) = unsafe_yyjson_get_next(val), \
-        (val) = (key) + 1) {
-            auto key_str = yyjson_get_str(key);
-            auto val_type = seq_yyjson_get_type_desc(val);
-            printf("### %s, %s\n", key_str, val_type);
-        }
+    for ((idx) = 0, (max) = yyjson_obj_size(obj),
+        (key) = (obj) ? unsafe_yyjson_get_first(obj) : NULL, (val) = (key) + 1;
+         (idx) < (max);
+         (idx)++, (key) = unsafe_yyjson_get_next(val), (val) = (key) + 1) {
+        auto key_str = yyjson_get_str(key);
+        auto val_type = seq_yyjson_get_type_desc(val);
+        printf("### %s, %s\n", key_str, val_type);
+    }
 }
 
 /*==============================================================================
@@ -446,30 +433,26 @@ SEQ_FUNC size_t seq_yyjson_mut_obj_size(yyjson_mut_val *obj) {
 /** Returns the value to which the specified key is mapped.
     Returns NULL if this object contains no mapping for the key.
     Returns NULL if `obj/key` is NULL, or type is not object.
-    
+
     The `key` should be a null-terminated UTF-8 string.
-    
+
     @warning This function takes a linear search time. */
 SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_get(yyjson_mut_val *obj,
-                                                     const char *key) {
-    return yyjson_mut_obj_get(obj,
-        key);
+                                                const char *key) {
+    return yyjson_mut_obj_get(obj, key);
 }
 
 /** Returns the value to which the specified key is mapped.
     Returns NULL if this object contains no mapping for the key.
     Returns NULL if `obj/key` is NULL, or type is not object.
-    
+
     The `key` should be a UTF-8 string, null-terminator is not required.
     The `key_len` should be the length of the key, in bytes.
-    
+
     @warning This function takes a linear search time. */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_getn(yyjson_mut_val *obj,
-                                                      const char *key,
-                                                      size_t key_len) {
-    return yyjson_mut_obj_getn(obj,
-        key,
-        key_len);
+SEQ_FUNC yyjson_mut_val *
+seq_yyjson_mut_obj_getn(yyjson_mut_val *obj, const char *key, size_t key_len) {
+    return yyjson_mut_obj_getn(obj, key, key_len);
 }
 
 /*==============================================================================
@@ -485,47 +468,44 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_doc_get_root(yyjson_mut_doc *doc) {
 /** Sets the root value of this JSON document.
     Pass NULL to clear root value of the document. */
 SEQ_FUNC void seq_yyjson_mut_doc_set_root(yyjson_mut_doc *doc,
-                                               yyjson_mut_val *root) {
-    return yyjson_mut_doc_set_root(doc,
-        root);
+                                          yyjson_mut_val *root) {
+    return yyjson_mut_doc_set_root(doc, root);
 }
 
 /**
  Set the string pool size for a mutable document.
  This function does not allocate memory immediately, but uses the size when
  the next memory allocation is needed.
- 
+
  If the caller knows the approximate bytes of strings that the document needs to
  store (e.g. copy string with `yyjson_mut_strcpy` function), setting a larger
  size can avoid multiple memory allocations and improve performance.
- 
+
  @param doc The mutable document.
  @param len The desired string pool size in bytes (total string length).
  @return true if successful, false if size is 0 or overflow.
  */
 SEQ_FUNC bool seq_yyjson_mut_doc_set_str_pool_size(yyjson_mut_doc *doc,
-                                                 size_t len) {
-    return yyjson_mut_doc_set_str_pool_size(doc,
-        len);
+                                                   size_t len) {
+    return yyjson_mut_doc_set_str_pool_size(doc, len);
 }
 
 /**
  Set the value pool size for a mutable document.
  This function does not allocate memory immediately, but uses the size when
  the next memory allocation is needed.
- 
+
  If the caller knows the approximate number of values that the document needs to
  store (e.g. create new value with `yyjson_mut_xxx` functions), setting a larger
  size can avoid multiple memory allocations and improve performance.
- 
+
  @param doc The mutable document.
  @param count The desired value pool size (number of `yyjson_mut_val`).
  @return true if successful, false if size is 0 or overflow.
  */
 SEQ_FUNC bool seq_yyjson_mut_doc_set_val_pool_size(yyjson_mut_doc *doc,
-                                                 size_t count) {
-    return yyjson_mut_doc_set_val_pool_size(doc,
-        count);
+                                                   size_t count) {
+    return yyjson_mut_doc_set_val_pool_size(doc, count);
 }
 
 /** Release the JSON document and free the memory.
@@ -546,9 +526,8 @@ SEQ_FUNC yyjson_mut_doc *seq_yyjson_mut_doc_new(const yyjson_alc *alc) {
     If allocator is NULL, the default allocator will be used.
     @note `imut_doc` -> `mut_doc`. */
 SEQ_FUNC yyjson_mut_doc *seq_yyjson_doc_mut_copy(yyjson_doc *doc,
-                                               const yyjson_alc *alc) {
-    return yyjson_doc_mut_copy(doc,
-        alc);
+                                                 const yyjson_alc *alc) {
+    return yyjson_doc_mut_copy(doc, alc);
 }
 
 /** Copies and returns a new mutable document from input, returns NULL on error.
@@ -556,9 +535,8 @@ SEQ_FUNC yyjson_mut_doc *seq_yyjson_doc_mut_copy(yyjson_doc *doc,
     If allocator is NULL, the default allocator will be used.
     @note `mut_doc` -> `mut_doc`. */
 SEQ_FUNC yyjson_mut_doc *seq_yyjson_mut_doc_mut_copy(yyjson_mut_doc *doc,
-                                                   const yyjson_alc *alc) {
-    return yyjson_mut_doc_mut_copy(doc,
-        alc);    
+                                                     const yyjson_alc *alc) {
+    return yyjson_mut_doc_mut_copy(doc, alc);
 }
 
 /** Copies and returns a new mutable value from input, returns NULL on error.
@@ -566,9 +544,8 @@ SEQ_FUNC yyjson_mut_doc *seq_yyjson_mut_doc_mut_copy(yyjson_mut_doc *doc,
     The memory was managed by mutable document.
     @note `imut_val` -> `mut_val`. */
 SEQ_FUNC yyjson_mut_val *seq_yyjson_val_mut_copy(yyjson_mut_doc *doc,
-                                               yyjson_val *val) {
-    return yyjson_val_mut_copy(doc,
-        val);
+                                                 yyjson_val *val) {
+    return yyjson_val_mut_copy(doc, val);
 }
 
 /** Copies and returns a new mutable value from input, returns NULL on error.
@@ -578,9 +555,8 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_val_mut_copy(yyjson_mut_doc *doc,
     @warning This function is recursive and may cause a stack overflow
         if the object level is too deep. */
 SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_val_mut_copy(yyjson_mut_doc *doc,
-                                                   yyjson_mut_val *val) {
-    return yyjson_mut_val_mut_copy(doc,
-        val);
+                                                     yyjson_mut_val *val) {
+    return yyjson_mut_val_mut_copy(doc, val);
 }
 
 /** Copies and returns a new immutable document from input,
@@ -590,9 +566,8 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_val_mut_copy(yyjson_mut_doc *doc,
     @warning This function is recursive and may cause a stack overflow
         if the object level is too deep. */
 SEQ_FUNC yyjson_doc *seq_yyjson_mut_doc_imut_copy(yyjson_mut_doc *doc,
-                                                const yyjson_alc *alc) {
-    return yyjson_mut_doc_imut_copy(doc,
-        alc);
+                                                  const yyjson_alc *alc) {
+    return yyjson_mut_doc_imut_copy(doc, alc);
 }
 
 /** Copies and returns a new immutable document from input,
@@ -602,9 +577,8 @@ SEQ_FUNC yyjson_doc *seq_yyjson_mut_doc_imut_copy(yyjson_mut_doc *doc,
     @warning This function is recursive and may cause a stack overflow
         if the object level is too deep. */
 SEQ_FUNC yyjson_doc *seq_yyjson_mut_val_imut_copy(yyjson_mut_val *val,
-                                                const yyjson_alc *alc) {
-    return yyjson_mut_val_imut_copy(val,
-        alc);
+                                                  const yyjson_alc *alc) {
+    return yyjson_mut_val_imut_copy(val, alc);
 }
 
 /*==============================================================================
@@ -631,42 +605,36 @@ SEQ_FUNC yyjson_doc *seq_yyjson_mut_val_imut_copy(yyjson_mut_val *val,
 //     return false
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_null(yyjson_mut_doc *doc,
-                                               yyjson_mut_val *obj,
-                                               const char *_key) {
-    yyjson_mut_obj_add_func({
-        val->tag = YYJSON_TYPE_NULL | YYJSON_SUBTYPE_NONE;
-    });
+                                          yyjson_mut_val *obj,
+                                          const char *_key) {
+    yyjson_mut_obj_add_func(
+        { val->tag = YYJSON_TYPE_NULL | YYJSON_SUBTYPE_NONE; });
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_true(yyjson_mut_doc *doc,
-                                               yyjson_mut_val *obj,
-                                               const char *_key) {
-    yyjson_mut_obj_add_func({
-        val->tag = YYJSON_TYPE_BOOL | YYJSON_SUBTYPE_TRUE;
-    });
+                                          yyjson_mut_val *obj,
+                                          const char *_key) {
+    yyjson_mut_obj_add_func(
+        { val->tag = YYJSON_TYPE_BOOL | YYJSON_SUBTYPE_TRUE; });
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_false(yyjson_mut_doc *doc,
-                                                yyjson_mut_val *obj,
-                                                const char *_key) {
-    yyjson_mut_obj_add_func({
-        val->tag = YYJSON_TYPE_BOOL | YYJSON_SUBTYPE_FALSE;
-    });
+                                           yyjson_mut_val *obj,
+                                           const char *_key) {
+    yyjson_mut_obj_add_func(
+        { val->tag = YYJSON_TYPE_BOOL | YYJSON_SUBTYPE_FALSE; });
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_bool(yyjson_mut_doc *doc,
-                                               yyjson_mut_val *obj,
-                                               const char *_key,
-                                               bool _val) {
-    yyjson_mut_obj_add_func({
-        val->tag = YYJSON_TYPE_BOOL | (uint8_t)((uint8_t)(_val) << 3);
-    });
+                                          yyjson_mut_val *obj, const char *_key,
+                                          bool _val) {
+    yyjson_mut_obj_add_func(
+        { val->tag = YYJSON_TYPE_BOOL | (uint8_t)((uint8_t)(_val) << 3); });
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_uint(yyjson_mut_doc *doc,
-                                               yyjson_mut_val *obj,
-                                               const char *_key,
-                                               uint64_t _val) {
+                                          yyjson_mut_val *obj, const char *_key,
+                                          uint64_t _val) {
     yyjson_mut_obj_add_func({
         val->tag = YYJSON_TYPE_NUM | YYJSON_SUBTYPE_UINT;
         val->uni.u64 = _val;
@@ -674,9 +642,8 @@ SEQ_FUNC bool seq_yyjson_mut_obj_add_uint(yyjson_mut_doc *doc,
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_sint(yyjson_mut_doc *doc,
-                                               yyjson_mut_val *obj,
-                                               const char *_key,
-                                               int64_t _val) {
+                                          yyjson_mut_val *obj, const char *_key,
+                                          int64_t _val) {
     yyjson_mut_obj_add_func({
         val->tag = YYJSON_TYPE_NUM | YYJSON_SUBTYPE_SINT;
         val->uni.i64 = _val;
@@ -684,9 +651,8 @@ SEQ_FUNC bool seq_yyjson_mut_obj_add_sint(yyjson_mut_doc *doc,
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_int(yyjson_mut_doc *doc,
-                                              yyjson_mut_val *obj,
-                                              const char *_key,
-                                              int64_t _val) {
+                                         yyjson_mut_val *obj, const char *_key,
+                                         int64_t _val) {
     yyjson_mut_obj_add_func({
         val->tag = YYJSON_TYPE_NUM | YYJSON_SUBTYPE_SINT;
         val->uni.i64 = _val;
@@ -694,9 +660,8 @@ SEQ_FUNC bool seq_yyjson_mut_obj_add_int(yyjson_mut_doc *doc,
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_real(yyjson_mut_doc *doc,
-                                               yyjson_mut_val *obj,
-                                               const char *_key,
-                                               double _val) {
+                                          yyjson_mut_val *obj, const char *_key,
+                                          double _val) {
     yyjson_mut_obj_add_func({
         val->tag = YYJSON_TYPE_NUM | YYJSON_SUBTYPE_REAL;
         val->uni.f64 = _val;
@@ -704,10 +669,10 @@ SEQ_FUNC bool seq_yyjson_mut_obj_add_real(yyjson_mut_doc *doc,
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_str(yyjson_mut_doc *doc,
-                                              yyjson_mut_val *obj,
-                                              const char *_key,
-                                              const char *_val) {
-    if (yyjson_unlikely(!_val)) return false;
+                                         yyjson_mut_val *obj, const char *_key,
+                                         const char *_val) {
+    if (yyjson_unlikely(!_val))
+        return false;
     yyjson_mut_obj_add_func({
         size_t val_len = strlen(_val);
         bool val_noesc = unsafe_yyjson_is_str_noesc(_val, val_len);
@@ -718,11 +683,10 @@ SEQ_FUNC bool seq_yyjson_mut_obj_add_str(yyjson_mut_doc *doc,
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_strn(yyjson_mut_doc *doc,
-                                               yyjson_mut_val *obj,
-                                               const char *_key,
-                                               const char *_val,
-                                               size_t _len) {
-    if (yyjson_unlikely(!_val)) return false;
+                                          yyjson_mut_val *obj, const char *_key,
+                                          const char *_val, size_t _len) {
+    if (yyjson_unlikely(!_val))
+        return false;
     yyjson_mut_obj_add_func({
         val->tag = ((uint64_t)_len << YYJSON_TAG_BIT) | YYJSON_TYPE_STR;
         val->uni.str = _val;
@@ -730,64 +694,66 @@ SEQ_FUNC bool seq_yyjson_mut_obj_add_strn(yyjson_mut_doc *doc,
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_strcpy(yyjson_mut_doc *doc,
-                                                 yyjson_mut_val *obj,
-                                                 const char *_key,
-                                                 const char *_val) {
-    if (yyjson_unlikely(!_val)) return false;
+                                            yyjson_mut_val *obj,
+                                            const char *_key,
+                                            const char *_val) {
+    if (yyjson_unlikely(!_val))
+        return false;
     yyjson_mut_obj_add_func({
         size_t _len = strlen(_val);
         val->uni.str = unsafe_yyjson_mut_strncpy(doc, _val, _len);
-        if (yyjson_unlikely(!val->uni.str)) return false;
+        if (yyjson_unlikely(!val->uni.str))
+            return false;
         val->tag = ((uint64_t)_len << YYJSON_TAG_BIT) | YYJSON_TYPE_STR;
     });
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_strncpy(yyjson_mut_doc *doc,
-                                                  yyjson_mut_val *obj,
-                                                  const char *_key,
-                                                  const char *_val,
-                                                  size_t _len) {
-    if (yyjson_unlikely(!_val)) return false;
+                                             yyjson_mut_val *obj,
+                                             const char *_key, const char *_val,
+                                             size_t _len) {
+    if (yyjson_unlikely(!_val))
+        return false;
     yyjson_mut_obj_add_func({
         val->uni.str = unsafe_yyjson_mut_strncpy(doc, _val, _len);
-        if (yyjson_unlikely(!val->uni.str)) return false;
+        if (yyjson_unlikely(!val->uni.str))
+            return false;
         val->tag = ((uint64_t)_len << YYJSON_TAG_BIT) | YYJSON_TYPE_STR;
     });
 }
 
 SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_add_arr(yyjson_mut_doc *doc,
-                                                         yyjson_mut_val *obj,
-                                                         const char *_key) {
+                                                    yyjson_mut_val *obj,
+                                                    const char *_key) {
     yyjson_mut_val *key = yyjson_mut_str(doc, _key);
     yyjson_mut_val *val = yyjson_mut_arr(doc);
     return yyjson_mut_obj_add(obj, key, val) ? val : NULL;
 }
 
 SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_add_obj(yyjson_mut_doc *doc,
-                                                         yyjson_mut_val *obj,
-                                                         const char *_key) {
+                                                    yyjson_mut_val *obj,
+                                                    const char *_key) {
     yyjson_mut_val *key = yyjson_mut_str(doc, _key);
     yyjson_mut_val *val = yyjson_mut_obj(doc);
     return yyjson_mut_obj_add(obj, key, val) ? val : NULL;
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_add_val(yyjson_mut_doc *doc,
-                                              yyjson_mut_val *obj,
-                                              const char *_key,
-                                              yyjson_mut_val *_val) {
-    if (yyjson_unlikely(!_val)) return false;
-    yyjson_mut_obj_add_func({
-        val = _val;
-    });
+                                         yyjson_mut_val *obj, const char *_key,
+                                         yyjson_mut_val *_val) {
+    if (yyjson_unlikely(!_val))
+        return false;
+    yyjson_mut_obj_add_func({ val = _val; });
 }
 
 SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_remove_str(yyjson_mut_val *obj,
-                                                            const char *key) {
+                                                       const char *key) {
     return yyjson_mut_obj_remove_strn(obj, key, key ? strlen(key) : 0);
 }
 
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_remove_strn(
-    yyjson_mut_val *obj, const char *_key, size_t _len) {
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_remove_strn(yyjson_mut_val *obj,
+                                                        const char *_key,
+                                                        size_t _len) {
     if (yyjson_likely(yyjson_mut_is_obj(obj) && _key)) {
         yyjson_mut_val *key;
         yyjson_mut_obj_iter iter;
@@ -795,7 +761,8 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_remove_strn(
         yyjson_mut_obj_iter_init(obj, &iter);
         while ((key = yyjson_mut_obj_iter_next(&iter)) != NULL) {
             if (unsafe_yyjson_equals_strn(key, _key, _len)) {
-                if (!val_removed) val_removed = key->next;
+                if (!val_removed)
+                    val_removed = key->next;
                 yyjson_mut_obj_iter_remove(&iter);
             }
         }
@@ -805,30 +772,32 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_remove_strn(
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_rename_key(yyjson_mut_doc *doc,
-                                                 yyjson_mut_val *obj,
-                                                 const char *key,
-                                                 const char *new_key) {
-    if (!key || !new_key) return false;
-    return yyjson_mut_obj_rename_keyn(doc, obj, key, strlen(key),
-                                      new_key, strlen(new_key));
+                                            yyjson_mut_val *obj,
+                                            const char *key,
+                                            const char *new_key) {
+    if (!key || !new_key)
+        return false;
+    return yyjson_mut_obj_rename_keyn(doc, obj, key, strlen(key), new_key,
+                                      strlen(new_key));
 }
 
 SEQ_FUNC bool seq_yyjson_mut_obj_rename_keyn(yyjson_mut_doc *doc,
-                                                  yyjson_mut_val *obj,
-                                                  const char *key,
-                                                  size_t len,
-                                                  const char *new_key,
-                                                  size_t new_len) {
+                                             yyjson_mut_val *obj,
+                                             const char *key, size_t len,
+                                             const char *new_key,
+                                             size_t new_len) {
     char *cpy_key = NULL;
     yyjson_mut_val *old_key;
     yyjson_mut_obj_iter iter;
-    if (!doc || !obj || !key || !new_key) return false;
+    if (!doc || !obj || !key || !new_key)
+        return false;
     yyjson_mut_obj_iter_init(obj, &iter);
     while ((old_key = yyjson_mut_obj_iter_next(&iter))) {
         if (unsafe_yyjson_equals_strn((void *)old_key, key, len)) {
             if (!cpy_key) {
                 cpy_key = unsafe_yyjson_mut_strncpy(doc, new_key, new_len);
-                if (!cpy_key) return false;
+                if (!cpy_key)
+                    return false;
             }
             yyjson_mut_set_strn(old_key, cpy_key, new_len);
         }
@@ -851,302 +820,302 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr(yyjson_mut_doc *doc) {
 
 /**
  Creates and returns a new mutable array with the given boolean values.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of boolean values.
  @param count The value count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const bool vals[3] = { true, false, true };
     yyjson_mut_val *arr = yyjson_mut_arr_with_bool(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_bool(
-    yyjson_mut_doc *doc, const bool *vals, size_t count) {
-    return yyjson_mut_arr_with_bool(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_bool(yyjson_mut_doc *doc,
+                                                      const bool *vals,
+                                                      size_t count) {
+    return yyjson_mut_arr_with_bool(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given sint numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of sint numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const int64_t vals[3] = { -1, 0, 1 };
     yyjson_mut_val *arr = yyjson_mut_arr_with_sint64(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_sint(
-    yyjson_mut_doc *doc, const int64_t *vals, size_t count) {
-    return yyjson_mut_arr_with_sint(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_sint(yyjson_mut_doc *doc,
+                                                      const int64_t *vals,
+                                                      size_t count) {
+    return yyjson_mut_arr_with_sint(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given uint numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of uint numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const uint64_t vals[3] = { 0, 1, 0 };
     yyjson_mut_val *arr = yyjson_mut_arr_with_uint(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_uint(
-    yyjson_mut_doc *doc, const uint64_t *vals, size_t count) {
-    return yyjson_mut_arr_with_uint(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_uint(yyjson_mut_doc *doc,
+                                                      const uint64_t *vals,
+                                                      size_t count) {
+    return yyjson_mut_arr_with_uint(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given real numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of real numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const double vals[3] = { 0.1, 0.2, 0.3 };
     yyjson_mut_val *arr = yyjson_mut_arr_with_real(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_real(
-    yyjson_mut_doc *doc, const double *vals, size_t count) {
-    return yyjson_mut_arr_with_real(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_real(yyjson_mut_doc *doc,
+                                                      const double *vals,
+                                                      size_t count) {
+    return yyjson_mut_arr_with_real(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given int8 numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of int8 numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const int8_t vals[3] = { -1, 0, 1 };
     yyjson_mut_val *arr = yyjson_mut_arr_with_sint8(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_sint8(
-    yyjson_mut_doc *doc, const int8_t *vals, size_t count) {
-    return yyjson_mut_arr_with_sint8(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_sint8(yyjson_mut_doc *doc,
+                                                       const int8_t *vals,
+                                                       size_t count) {
+    return yyjson_mut_arr_with_sint8(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given int16 numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of int16 numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const int16_t vals[3] = { -1, 0, 1 };
     yyjson_mut_val *arr = yyjson_mut_arr_with_sint16(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_sint16(
-    yyjson_mut_doc *doc, const int16_t *vals, size_t count) {
-    return yyjson_mut_arr_with_sint16(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_sint16(yyjson_mut_doc *doc,
+                                                        const int16_t *vals,
+                                                        size_t count) {
+    return yyjson_mut_arr_with_sint16(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given int32 numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of int32 numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const int32_t vals[3] = { -1, 0, 1 };
     yyjson_mut_val *arr = yyjson_mut_arr_with_sint32(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_sint32(
-    yyjson_mut_doc *doc, const int32_t *vals, size_t count) {
-    return yyjson_mut_arr_with_sint32(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_sint32(yyjson_mut_doc *doc,
+                                                        const int32_t *vals,
+                                                        size_t count) {
+    return yyjson_mut_arr_with_sint32(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given int64 numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of int64 numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const int64_t vals[3] = { -1, 0, 1 };
     yyjson_mut_val *arr = yyjson_mut_arr_with_sint64(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_sint64(
-    yyjson_mut_doc *doc, const int64_t *vals, size_t count) {
-    return yyjson_mut_arr_with_sint64(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_sint64(yyjson_mut_doc *doc,
+                                                        const int64_t *vals,
+                                                        size_t count) {
+    return yyjson_mut_arr_with_sint64(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given uint8 numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of uint8 numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const uint8_t vals[3] = { 0, 1, 0 };
     yyjson_mut_val *arr = yyjson_mut_arr_with_uint8(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_uint8(
-    yyjson_mut_doc *doc, const uint8_t *vals, size_t count) {
-    return yyjson_mut_arr_with_uint8(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_uint8(yyjson_mut_doc *doc,
+                                                       const uint8_t *vals,
+                                                       size_t count) {
+    return yyjson_mut_arr_with_uint8(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given uint16 numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of uint16 numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const uint16_t vals[3] = { 0, 1, 0 };
     yyjson_mut_val *arr = yyjson_mut_arr_with_uint16(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_uint16(
-    yyjson_mut_doc *doc, const uint16_t *vals, size_t count) {
-    return yyjson_mut_arr_with_uint16(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_uint16(yyjson_mut_doc *doc,
+                                                        const uint16_t *vals,
+                                                        size_t count) {
+    return yyjson_mut_arr_with_uint16(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given uint32 numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of uint32 numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const uint32_t vals[3] = { 0, 1, 0 };
     yyjson_mut_val *arr = yyjson_mut_arr_with_uint32(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_uint32(
-    yyjson_mut_doc *doc, const uint32_t *vals, size_t count) {
-    return yyjson_mut_arr_with_uint32(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_uint32(yyjson_mut_doc *doc,
+                                                        const uint32_t *vals,
+                                                        size_t count) {
+    return yyjson_mut_arr_with_uint32(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given uint64 numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of uint64 numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
      const uint64_t vals[3] = { 0, 1, 0 };
      yyjson_mut_val *arr = yyjson_mut_arr_with_uint64(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_uint64(
-    yyjson_mut_doc *doc, const uint64_t *vals, size_t count) {
-    return yyjson_mut_arr_with_uint64(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_uint64(yyjson_mut_doc *doc,
+                                                        const uint64_t *vals,
+                                                        size_t count) {
+    return yyjson_mut_arr_with_uint64(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given float numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of float numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const float vals[3] = { -1.0f, 0.0f, 1.0f };
     yyjson_mut_val *arr = yyjson_mut_arr_with_float(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_float(
-    yyjson_mut_doc *doc, const float *vals, size_t count) {
-    return yyjson_mut_arr_with_float(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_float(yyjson_mut_doc *doc,
+                                                       const float *vals,
+                                                       size_t count) {
+    return yyjson_mut_arr_with_float(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given double numbers.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of double numbers.
  @param count The number count. If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const double vals[3] = { -1.0, 0.0, 1.0 };
     yyjson_mut_val *arr = yyjson_mut_arr_with_double(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_double(
-    yyjson_mut_doc *doc, const double *vals, size_t count) {
-    return yyjson_mut_arr_with_double(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_double(yyjson_mut_doc *doc,
+                                                        const double *vals,
+                                                        size_t count) {
+    return yyjson_mut_arr_with_double(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given strings, these strings
  will not be copied.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of UTF-8 null-terminator strings.
@@ -1154,27 +1123,27 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_double(
  @param count The number of values in `vals`.
     If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @warning The input strings are not copied, you should keep these strings
     unmodified for the lifetime of this JSON document. If these strings will be
     modified, you should use `yyjson_mut_arr_with_strcpy()` instead.
- 
+
  @par Example
  @code
     const char *vals[3] = { "a", "b", "c" };
     yyjson_mut_val *arr = yyjson_mut_arr_with_str(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_str(
-    yyjson_mut_doc *doc, const char **vals, size_t count) {
-    return yyjson_mut_arr_with_str(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_str(yyjson_mut_doc *doc,
+                                                     const char **vals,
+                                                     size_t count) {
+    return yyjson_mut_arr_with_str(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given strings and string
  lengths, these strings will not be copied.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of UTF-8 strings, null-terminator is not required.
@@ -1183,11 +1152,11 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_str(
  @param count The number of strings in `vals`.
     If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @warning The input strings are not copied, you should keep these strings
     unmodified for the lifetime of this JSON document. If these strings will be
     modified, you should use `yyjson_mut_arr_with_strncpy()` instead.
- 
+
  @par Example
  @code
     const char *vals[3] = { "a", "bb", "c" };
@@ -1195,16 +1164,17 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_str(
     yyjson_mut_val *arr = yyjson_mut_arr_with_strn(doc, vals, lens, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_strn(
-    yyjson_mut_doc *doc, const char **vals, const size_t *lens, size_t count) {
-    return yyjson_mut_arr_with_strn(
-        doc, vals, lens, count);    
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_strn(yyjson_mut_doc *doc,
+                                                      const char **vals,
+                                                      const size_t *lens,
+                                                      size_t count) {
+    return yyjson_mut_arr_with_strn(doc, vals, lens, count);
 }
 
 /**
  Creates and returns a new mutable array with the given strings, these strings
  will be copied.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of UTF-8 null-terminator strings.
@@ -1212,23 +1182,23 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_strn(
  @param count The number of values in `vals`.
     If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const char *vals[3] = { "a", "b", "c" };
     yyjson_mut_val *arr = yyjson_mut_arr_with_strcpy(doc, vals, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_strcpy(
-    yyjson_mut_doc *doc, const char **vals, size_t count) {
-    return yyjson_mut_arr_with_strcpy(
-        doc, vals, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_strcpy(yyjson_mut_doc *doc,
+                                                        const char **vals,
+                                                        size_t count) {
+    return yyjson_mut_arr_with_strcpy(doc, vals, count);
 }
 
 /**
  Creates and returns a new mutable array with the given strings and string
  lengths, these strings will be copied.
- 
+
  @param doc A mutable document, used for memory allocation only.
     If this parameter is NULL, the function will fail and return NULL.
  @param vals A C array of UTF-8 strings, null-terminator is not required.
@@ -1237,7 +1207,7 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_strcpy(
  @param count The number of strings in `vals`.
     If this value is 0, an empty array will return.
  @return The new array. NULL if input is invalid or memory allocation failed.
- 
+
  @par Example
  @code
     const char *vals[3] = { "a", "bb", "c" };
@@ -1245,10 +1215,11 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_strcpy(
     yyjson_mut_val *arr = yyjson_mut_arr_with_strn(doc, vals, lens, 3);
  @endcode
  */
-SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_strncpy(
-    yyjson_mut_doc *doc, const char **vals, const size_t *lens, size_t count) {
-    return yyjson_mut_arr_with_strncpy(
-        doc, vals, lens, count);
+SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_strncpy(yyjson_mut_doc *doc,
+                                                         const char **vals,
+                                                         const size_t *lens,
+                                                         size_t count) {
+    return yyjson_mut_arr_with_strncpy(doc, vals, lens, count);
 }
 
 /*==============================================================================
@@ -1257,10 +1228,10 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_strncpy(
 
 /**
  Write a document to JSON string with options.
- 
+
  This function is thread-safe when:
  The `alc` is thread-safe or NULL.
- 
+
  @param doc The JSON document.
     If this doc is NULL or has no root, the function will fail and return false.
  @param flg The JSON write options.
@@ -1276,20 +1247,15 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_arr_with_strncpy(
     When it's no longer needed, it should be freed with free() or alc->free().
  */
 SEQ_FUNC char *seq_yyjson_write_opts(const yyjson_doc *doc,
-                                   yyjson_write_flag flg,
-                                   const yyjson_alc *alc,
-                                   size_t *len,
-                                   yyjson_write_err *err) {
-return yyjson_write_opts(doc,
-    flg,
-    alc,
-    len,
-    err);
+                                     yyjson_write_flag flg,
+                                     const yyjson_alc *alc, size_t *len,
+                                     yyjson_write_err *err) {
+    return yyjson_write_opts(doc, flg, alc, len, err);
 }
 
 /**
  Write a document to JSON file with options.
- 
+
  This function is thread-safe when:
  1. The file is not accessed by other threads.
  2. The `alc` is thread-safe or NULL.
@@ -1306,24 +1272,19 @@ return yyjson_write_opts(doc,
  @param err A pointer to receive error information.
     Pass NULL if you don't need error information.
  @return true if successful, false if an error occurs.
- 
+
  @warning On 32-bit operating system, files larger than 2GB may fail to write.
  */
-SEQ_FUNC bool seq_yyjson_write_file(const char *path,
-                                  const yyjson_doc *doc,
-                                  yyjson_write_flag flg,
-                                  const yyjson_alc *alc,
-                                  yyjson_write_err *err) {
-    return yyjson_write_file(path,
-        doc,
-        flg,
-        alc,
-        err);
+SEQ_FUNC bool seq_yyjson_write_file(const char *path, const yyjson_doc *doc,
+                                    yyjson_write_flag flg,
+                                    const yyjson_alc *alc,
+                                    yyjson_write_err *err) {
+    return yyjson_write_file(path, doc, flg, alc, err);
 }
 
 /**
  Write a document to file pointer with options.
- 
+
  @param fp The file pointer.
     The data will be written to the current position of the file.
     If this fp is NULL or invalid, the function will fail and return false.
@@ -1336,26 +1297,20 @@ SEQ_FUNC bool seq_yyjson_write_file(const char *path,
  @param err A pointer to receive error information.
     Pass NULL if you don't need error information.
  @return true if successful, false if an error occurs.
- 
+
  @warning On 32-bit operating system, files larger than 2GB may fail to write.
  */
-SEQ_FUNC bool seq_yyjson_write_fp(FILE *fp,
-                                const yyjson_doc *doc,
-                                yyjson_write_flag flg,
-                                const yyjson_alc *alc,
-                                yyjson_write_err *err) {
-    return yyjson_write_fp(fp,
-        doc,
-        flg,
-        alc,
-        err);
+SEQ_FUNC bool seq_yyjson_write_fp(FILE *fp, const yyjson_doc *doc,
+                                  yyjson_write_flag flg, const yyjson_alc *alc,
+                                  yyjson_write_err *err) {
+    return yyjson_write_fp(fp, doc, flg, alc, err);
 }
 
 /**
  Write a document to JSON string.
- 
+
  This function is thread-safe.
- 
+
  @param doc The JSON document.
     If this doc is NULL or has no root, the function will fail and return false.
  @param flg The JSON write options.
@@ -1366,16 +1321,14 @@ SEQ_FUNC bool seq_yyjson_write_fp(FILE *fp,
     This string is encoded as UTF-8 with a null-terminator.
     When it's no longer needed, it should be freed with free().
  */
-SEQ_FUNC char *seq_yyjson_write(const yyjson_doc *doc,
-                                     yyjson_write_flag flg,
-                                     size_t *len) {
+SEQ_FUNC char *seq_yyjson_write(const yyjson_doc *doc, yyjson_write_flag flg,
+                                size_t *len) {
     return yyjson_write_opts(doc, flg, NULL, len, NULL);
 }
 
-
 /**
  Write a document to JSON string with options.
- 
+
  This function is thread-safe when:
  1. The `doc` is not modified by other threads.
  2. The `alc` is thread-safe or NULL.
@@ -1395,25 +1348,20 @@ SEQ_FUNC char *seq_yyjson_write(const yyjson_doc *doc,
     When it's no longer needed, it should be freed with free() or alc->free().
  */
 SEQ_FUNC char *seq_yyjson_mut_write_opts(const yyjson_mut_doc *doc,
-                                       yyjson_write_flag flg,
-                                       const yyjson_alc *alc,
-                                       size_t *len,
-                                       yyjson_write_err *err) {
-    return yyjson_mut_write_opts(doc,
-        flg,
-        alc,
-        len,
-        err);
+                                         yyjson_write_flag flg,
+                                         const yyjson_alc *alc, size_t *len,
+                                         yyjson_write_err *err) {
+    return yyjson_mut_write_opts(doc, flg, alc, len, err);
 }
 
 /**
  Write a document to JSON file with options.
- 
+
  This function is thread-safe when:
  1. The file is not accessed by other threads.
  2. The `doc` is not modified by other threads.
  3. The `alc` is thread-safe or NULL.
- 
+
  @param path The JSON file's path.
     If this path is NULL or invalid, the function will fail and return false.
     If this file is not empty, the content will be discarded.
@@ -1426,24 +1374,20 @@ SEQ_FUNC char *seq_yyjson_mut_write_opts(const yyjson_mut_doc *doc,
  @param err A pointer to receive error information.
     Pass NULL if you don't need error information.
  @return true if successful, false if an error occurs.
- 
+
  @warning On 32-bit operating system, files larger than 2GB may fail to write.
  */
 SEQ_FUNC bool seq_yyjson_mut_write_file(const char *path,
-                                      const yyjson_mut_doc *doc,
-                                      yyjson_write_flag flg,
-                                      const yyjson_alc *alc,
-                                      yyjson_write_err *err) {
-    return yyjson_mut_write_file(path,
-        doc,
-        flg,
-        alc,
-        err);
+                                        const yyjson_mut_doc *doc,
+                                        yyjson_write_flag flg,
+                                        const yyjson_alc *alc,
+                                        yyjson_write_err *err) {
+    return yyjson_mut_write_file(path, doc, flg, alc, err);
 }
 
 /**
  Write a document to file pointer with options.
- 
+
  @param fp The file pointer.
     The data will be written to the current position of the file.
     If this fp is NULL or invalid, the function will fail and return false.
@@ -1456,27 +1400,22 @@ SEQ_FUNC bool seq_yyjson_mut_write_file(const char *path,
  @param err A pointer to receive error information.
     Pass NULL if you don't need error information.
  @return true if successful, false if an error occurs.
- 
+
  @warning On 32-bit operating system, files larger than 2GB may fail to write.
  */
-SEQ_FUNC bool seq_yyjson_mut_write_fp(FILE *fp,
-                                    const yyjson_mut_doc *doc,
-                                    yyjson_write_flag flg,
-                                    const yyjson_alc *alc,
-                                    yyjson_write_err *err) {
-    return yyjson_mut_write_fp(fp,
-        doc,
-        flg,
-        alc,
-        err);
+SEQ_FUNC bool seq_yyjson_mut_write_fp(FILE *fp, const yyjson_mut_doc *doc,
+                                      yyjson_write_flag flg,
+                                      const yyjson_alc *alc,
+                                      yyjson_write_err *err) {
+    return yyjson_mut_write_fp(fp, doc, flg, alc, err);
 }
 
 /**
  Write a document to JSON string.
- 
+
  This function is thread-safe when:
  The `doc` is not modified by other threads.
- 
+
  @param doc The JSON document.
     If this doc is NULL or has no root, the function will fail and return false.
  @param flg The JSON write options.
@@ -1488,8 +1427,7 @@ SEQ_FUNC bool seq_yyjson_mut_write_fp(FILE *fp,
     When it's no longer needed, it should be freed with free().
  */
 SEQ_FUNC char *seq_yyjson_mut_write(const yyjson_mut_doc *doc,
-                                         yyjson_write_flag flg,
-                                         size_t *len) {
+                                    yyjson_write_flag flg, size_t *len) {
     return yyjson_mut_write_opts(doc, flg, NULL, len, NULL);
 }
 
@@ -1506,10 +1444,10 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj(yyjson_mut_doc *doc) {
  Creates and returns a mutable object with keys and values, returns NULL on
  error. The keys and values are not copied. The strings should be a
  null-terminated UTF-8 string.
- 
+
  @warning The input string is not copied, you should keep this string
     unmodified for the lifetime of this JSON document.
- 
+
  @par Example
  @code
     const char *keys[2] = { "id", "name" };
@@ -1518,23 +1456,20 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj(yyjson_mut_doc *doc) {
  @endcode
  */
 SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_with_str(yyjson_mut_doc *doc,
-                                                          const char **keys,
-                                                          const char **vals,
-                                                          size_t count) {
-    return yyjson_mut_obj_with_str(doc,
-        keys,
-        vals,
-        count);
+                                                     const char **keys,
+                                                     const char **vals,
+                                                     size_t count) {
+    return yyjson_mut_obj_with_str(doc, keys, vals, count);
 }
 
 /**
  Creates and returns a mutable object with key-value pairs and pair count,
  returns NULL on error. The keys and values are not copied. The strings should
  be a null-terminated UTF-8 string.
- 
+
  @warning The input string is not copied, you should keep this string
     unmodified for the lifetime of this JSON document.
- 
+
  @par Example
  @code
     const char *kv_pairs[4] = { "id", "01", "name", "Harry" };
@@ -1542,9 +1477,7 @@ SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_with_str(yyjson_mut_doc *doc,
  @endcode
  */
 SEQ_FUNC yyjson_mut_val *seq_yyjson_mut_obj_with_kv(yyjson_mut_doc *doc,
-                                                         const char **kv_pairs,
-                                                         size_t pair_count) {
-    return yyjson_mut_obj_with_kv(doc,
-        kv_pairs,
-        pair_count);
+                                                    const char **kv_pairs,
+                                                    size_t pair_count) {
+    return yyjson_mut_obj_with_kv(doc, kv_pairs, pair_count);
 }

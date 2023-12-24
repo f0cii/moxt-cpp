@@ -26,12 +26,18 @@
 #endif
 
 // #include <fmtlog/fmtlog.h>
-#include <spdlog/spdlog.h>
+// #include <spdlog/spdlog.h>
+#include <quill/Quill.h>
 
-#define logd spdlog::debug
-#define logi spdlog::info
-#define logw spdlog::warn
-#define loge spdlog::error
+// #define logd spdlog::debug
+// #define logi spdlog::info
+// #define logw spdlog::warn
+// #define loge spdlog::error
+
+#define logd(fmt, ...) QUILL_LOG_DEBUG(quill::get_logger(), fmt, ##__VA_ARGS__)
+#define logi(fmt, ...) QUILL_LOG_INFO(quill::get_logger(), fmt, ##__VA_ARGS__)
+#define logw(fmt, ...) QUILL_LOG_WARNING(quill::get_logger(), fmt, ##__VA_ARGS__)
+#define loge(fmt, ...) QUILL_LOG_ERROR(quill::get_logger(), fmt, ##__VA_ARGS__)
 
 #define SEQ_FUNC extern "C"
 

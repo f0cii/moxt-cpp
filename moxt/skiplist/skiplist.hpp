@@ -6,13 +6,18 @@
 #ifndef SKIPLISTPRO_SKIPLIST_H
 #define SKIPLISTPRO_SKIPLIST_H
 
+// 以下修改版本，修正了内存问题
+// https://github.com/ioperations/SkipListPro
+
 #include "Node.h"
-#include "fixed_12.hpp"
+#include "moxt/fixed12.hpp"
+#include "moxt/fixed_12.hpp"
 #include "random.h"
 #include <cassert>
 #include <cstddef>
 #include <ctime>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -42,6 +47,10 @@ template <typename K, typename V> class SkipList {
     void dumpAllNodes();
 
     void topN(int n, std::vector<std::pair<K, V>> &v);
+
+    void topN(int n, std::vector<OrderBookLevel> &v);
+
+    void topN(int n, std::vector<OrderBookLevel_t> &v);
 
     void dumpNodeDetail(Node<K, V> *node, int nodeLevel);
 
@@ -225,6 +234,41 @@ void SkipList<K, V>::topN(int n, std::vector<std::pair<K, V>> &v) {
 }
 
 template <typename K, typename V>
+void SkipList<K, V>::topN(int n, std::vector<OrderBookLevel> &v) {
+    Node<K, V> *node = header;
+    int count = 0;
+    while (node->forward[0] != footer) {
+        if (count >= n) {
+            break;
+        }
+        node = node->forward[0];
+        if (node == nullptr) {
+            continue;
+        }
+        v.push_back(OrderBookLevel(node->key, node->value));
+        ++count;
+    }
+}
+
+template <typename K, typename V>
+void SkipList<K, V>::topN(int n, std::vector<OrderBookLevel_t> &v) {
+    Node<K, V> *node = header;
+    int count = 0;
+    while (node->forward[0] != footer) {
+        if (count >= n) {
+            break;
+        }
+        node = node->forward[0];
+        if (node == nullptr) {
+            continue;
+        }
+        v.push_back(OrderBookLevel_t(Fixed12::newV(node->key),
+                                     Fixed12::newV(node->value)));
+        ++count;
+    }
+}
+
+template <typename K, typename V>
 void SkipList<K, V>::dumpNodeDetail(Node<K, V> *node, int nodeLevel) {
     if (node == nullptr) {
         return;
@@ -288,5 +332,8 @@ template <typename K, typename V> int SkipList<K, V>::getRandomLevel() {
     }
     return level;
 }
+
+// typedef SkipList<int64_t, int64_t> skiplist_t;
+typedef SkipList<fixed_12_t, fixed_12_t> skiplist_t;
 
 #endif // SKIPLISTPRO_SKIPLIST_H

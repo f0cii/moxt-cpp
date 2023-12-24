@@ -15,7 +15,7 @@ package("snmalloc-local")
         add_syslinks("onecore")
     end
 
-    on_install("macosx", "windows", "linux", "bsd", function (package)
+    on_install("macosx", "windows", "mingw", "linux", "bsd", function (package)
         local configs = {}
         table.insert(configs, "-DSNMALLOC_BUILD_TESTING=OFF")
         -- table.insert(configs, "-DSNMALLOC_DISABLE_EXCEPTIONS_REPORTING=1")

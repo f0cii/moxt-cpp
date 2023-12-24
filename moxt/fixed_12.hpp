@@ -2,29 +2,20 @@
 
 #include "common.hpp"
 #include "libc.hpp"
-#include <cstring>
-#include <math.h>
-#include <memory.h>
-#include <memory>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <string>
 
 // 快速反序列化int64
 // https://kholdstare.github.io/technical/2020/05/26/faster-integer-parsing.html
 
-typedef struct {
-    int64_t fp;
-} fixed_12_t;
+// typedef struct {
+//     int64_t fp;
+// } fixed_12_t;
 
-inline int64_t stringToInt64(const std::string_view &s) {
-    int64_t result = 0;
-    for (char c : s) {
-        result = result * 10 + (c - '0');
-    }
-    return result;
-}
+typedef int64_t fixed_12_t;
+
+struct OrderBookLevel {
+    fixed_12_t price;
+    fixed_12_t qty;
+};
 
 SEQ_FUNC fixed_12_t fixed_12_new();
 
@@ -33,6 +24,8 @@ SEQ_FUNC fixed_12_t fixed_12_new_int(int64_t value);
 SEQ_FUNC fixed_12_t fixed_12_new_double(double value);
 
 SEQ_FUNC fixed_12_t fixed_12_new_string_n(const char *cstr, size_t len);
+
+SEQ_FUNC fixed_12_t fixed_12_new_string_view(const std::string_view& s);
 
 SEQ_FUNC fixed_12_t fixed_12_new_string(const char *cstr);
 

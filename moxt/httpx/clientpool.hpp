@@ -5,8 +5,8 @@
 #ifndef MOXT_CONNECTION_POOL_HPP
 #define MOXT_CONNECTION_POOL_HPP
 
-#include "common.hpp"
-#include "httpclient.hpp"
+#include "moxt/httpx/httpclient.hpp"
+#include "moxt/common.hpp"
 
 class HttpClientPool {
   public:
