@@ -24,7 +24,7 @@ add_requires("quill-local", {alias = 'quill'})
 add_requires("nanobench")
 add_requires("concurrentqueue")
 add_requires("nanoid-cpp-local", {alias = 'nanoid-cpp'})
-add_requires("zlib 1.2.12", {system=false})
+add_requires("zlib", {system=false})
 add_requires("openssl", {system=false})
 add_requires("tscns")
 
