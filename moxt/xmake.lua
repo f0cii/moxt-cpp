@@ -33,12 +33,13 @@ target("moxt")
 		add_packages("libbacktrace")
 		add_cxflags("-fpermissive")
 	end
+	
 	add_packages("fpm")
 	add_packages("boost")
 	add_packages("tscns")
 
 	add_packages("fmt")
-	-- add_packages("fmtlog")
+	add_packages("fmtlog")
 	-- add_packages("spdlog")
 	add_packages("quill")
 	add_packages("abseil")

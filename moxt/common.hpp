@@ -25,19 +25,22 @@
 #undef min
 #endif
 
-// #include <fmtlog/fmtlog.h>
-// #include <spdlog/spdlog.h>
+#define USE_FMTLOG 1
+
+#if defined (USE_FMTLOG)
+#include <fmtlog/fmtlog.h>
+#else
 #include <quill/Quill.h>
+#define logd(fmt, ...) QUILL_LOG_DEBUG(quill::get_logger(), fmt, ##__VA_ARGS__)
+#define logi(fmt, ...) QUILL_LOG_INFO(quill::get_logger(), fmt, ##__VA_ARGS__)
+#define logw(fmt, ...) QUILL_LOG_WARNING(quill::get_logger(), fmt, ##__VA_ARGS__)
+#define loge(fmt, ...) QUILL_LOG_ERROR(quill::get_logger(), fmt, ##__VA_ARGS__)
+#endif
 
 // #define logd spdlog::debug
 // #define logi spdlog::info
 // #define logw spdlog::warn
 // #define loge spdlog::error
-
-#define logd(fmt, ...) QUILL_LOG_DEBUG(quill::get_logger(), fmt, ##__VA_ARGS__)
-#define logi(fmt, ...) QUILL_LOG_INFO(quill::get_logger(), fmt, ##__VA_ARGS__)
-#define logw(fmt, ...) QUILL_LOG_WARNING(quill::get_logger(), fmt, ##__VA_ARGS__)
-#define loge(fmt, ...) QUILL_LOG_ERROR(quill::get_logger(), fmt, ##__VA_ARGS__)
 
 #define SEQ_FUNC extern "C"
 

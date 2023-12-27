@@ -1,7 +1,10 @@
 #include "libthread.hpp"
+#include "common.hpp"
 #include <chrono>
 #include <cmath>
+#include <csignal>
 #include <photon/common/alog.h>
+#include <photon/io/signal.h>
 #include <photon/net/http/client.h>
 #include <photon/net/socket.h>
 #include <photon/thread/thread-pool.h>
@@ -307,4 +310,14 @@ SEQ_FUNC void seq_thread_test1() {
     logi("seq_thread_test end");
 
     photon::delete_thread_pool(pool);
+}
+
+SEQ_FUNC void seq_init_signal(signal_handle_t handle) {
+    signal(SIGTERM, handle);
+    signal(SIGINT, handle);
+}
+
+SEQ_FUNC void seq_init_photon_signal(signal_handle_t handle) {
+    photon::sync_signal(SIGTERM, handle);
+    photon::sync_signal(SIGINT, handle);
 }

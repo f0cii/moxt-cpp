@@ -185,7 +185,7 @@ SEQ_FUNC size_t fixed_12_string_res(const fixed_12_t fixed, char *result) {
         }
 
         // Copy the non-zero digits of the fractional part
-        for (int i = 0; i < fracPartLength - 1; i++) {
+        for (int i = 0; i < fracPartLength - fracPartN; i++) {
             result[index++] = fracPart[i];
         }
     }
