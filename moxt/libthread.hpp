@@ -101,4 +101,10 @@ SEQ_FUNC photon::thread *seq_photon_current_thread();
 
 SEQ_FUNC void seq_thread_test();
 
+typedef void (*signal_handle_t)(int sig);
+
+SEQ_FUNC void seq_init_signal(signal_handle_t handle);
+
+SEQ_FUNC void seq_init_photon_signal(signal_handle_t handle);
+
 #endif

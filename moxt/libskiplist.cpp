@@ -17,7 +17,7 @@ SEQ_FUNC skiplist_t *seq_skiplist_new(bool isForward) {
     }
 }
 
-SEQ_FUNC void seq_skiplist_delete(skiplist_t *list) {
+SEQ_FUNC void seq_skiplist_free(skiplist_t *list) {
     delete list;
     list = nullptr;
 }

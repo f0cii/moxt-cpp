@@ -189,3 +189,26 @@ int test_fixed12() {
 
     return 0;
 }
+
+SEQ_FUNC int64_t seq_fixed_mul(int64_t a, int64_t b) {
+    auto value = static_cast<big_int>(a) * static_cast<big_int>(b) /
+                 static_cast<big_int>(FIXED_SCALE);
+    return value.convert_to<int64_t>();
+}
+
+SEQ_FUNC int64_t seq_fixed_truediv(int64_t a, int64_t b) {
+    auto value = (static_cast<big_int>(a) * static_cast<big_int>(FIXED_SCALE)) /
+                 static_cast<big_int>(b);
+    return value.convert_to<int64_t>();
+}
+
+SEQ_FUNC int64_t seq_fixed_round_to_fractional(int64_t a, int64_t scale) {
+    return static_cast<int64_t>(::round(a / static_cast<double>(scale)) *
+                                scale);
+}
+
+SEQ_FUNC int64_t seq_fixed_round(int64_t a, int decimalPlaces) {
+    int64_t scale = std::pow(10, MAX_FRAC_BITS - decimalPlaces);
+    return static_cast<int64_t>(::round(a / static_cast<double>(scale)) *
+                                scale);
+}

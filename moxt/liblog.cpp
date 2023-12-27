@@ -12,11 +12,11 @@
 #include <quill/Quill.h>
 
 void *coro_log_run(void *arg) {
-    // for (;;) {
-    //     fmtlog::poll();
-    //     photon::thread_usleep(100);
-    //     // photon::thread_yield();
-    // }
+    for (;;) {
+        fmtlog::poll();
+        photon::thread_usleep(100);
+        // photon::thread_yield();
+    }
     return nullptr;
 }
 
@@ -27,6 +27,12 @@ SEQ_FUNC void seq_init_log(uint8_t level, const char *filename,
 }
 
 void init_log(uint8_t level, const std::string &filename) {
+#if defined(USE_FMTLOG)
+    fmtlog::setLogLevel(static_cast<fmtlog::LogLevel>(level));
+    auto work_pool = seq_photon_work_pool();
+    work_pool->thread_migrate(photon::thread_create(coro_log_run, nullptr),
+                              -1UL);
+#else
     auto logLevel = static_cast<quill::LogLevel>(level);
     quill::get_logger()->set_log_level(logLevel); // quill::LogLevel::TraceL1
 
@@ -63,6 +69,7 @@ void init_log(uint8_t level, const std::string &filename) {
 
     quill::configure(cfg);
     quill::start();
+#endif
 }
 
 SEQ_FUNC void seq_set_log_file(const char *filename) {

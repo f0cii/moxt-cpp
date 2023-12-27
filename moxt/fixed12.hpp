@@ -21,6 +21,9 @@ using cpp_dec_float_50 = boost::multiprecision::cpp_dec_float_50;
 // 返回小数位: 0.001 -> 4
 int decimalPlaces(double value);
 
+constexpr int64_t FIXED_SCALE = 1000000000000;
+constexpr int MAX_FRAC_BITS = 12;
+
 class Fixed12 {
   protected:
     Fixed12(int64_t value) : value_(value) {}
@@ -109,8 +112,8 @@ class Fixed12 {
 
   private:
     int64_t value_;
-    static constexpr int64_t FIXED_SCALE = 1000000000000;
-    static constexpr int MAX_FRAC_BITS = 12;
+    // static constexpr int64_t FIXED_SCALE = 1000000000000;
+    // static constexpr int MAX_FRAC_BITS = 12;
 };
 
 struct OrderBookLevel_t {
@@ -121,5 +124,15 @@ struct OrderBookLevel_t {
 const Fixed12 Fixed12Zero = Fixed12::newI(0);
 const Fixed12 Fixed12One = Fixed12::newI(1);
 const Fixed12 Fixed12Two = Fixed12::newI(2);
+
+// 自定义*
+SEQ_FUNC int64_t seq_fixed_mul(int64_t a, int64_t b);
+
+// 自定义/
+SEQ_FUNC int64_t seq_fixed_truediv(int64_t a, int64_t b);
+
+SEQ_FUNC int64_t seq_fixed_round_to_fractional(int64_t a, int64_t scale);
+
+SEQ_FUNC int64_t seq_fixed_round(int64_t a, int decimalPlaces);
 
 int test_fixed12();
