@@ -60,3 +60,22 @@ SEQ_FUNC void seq_skiplist_top_n(skiplist_t *list, int n, int64_t *keys,
     }
     *resSize = size;
 }
+
+SEQ_FUNC Node<fixed_12_t, fixed_12_t> *
+seq_skiplist_begin(const skiplist_t *skipList) {
+    return skipList->begin();
+}
+
+SEQ_FUNC Node<fixed_12_t, fixed_12_t> *seq_skiplist_end() { return nullptr; }
+
+SEQ_FUNC Node<fixed_12_t, fixed_12_t> *
+seq_skiplist_next(const skiplist_t *skipList,
+                  Node<fixed_12_t, fixed_12_t> *node) {
+    return skipList->next(node);
+}
+
+SEQ_FUNC void seq_skiplist_node_value(Node<fixed_12_t, fixed_12_t> *node,
+                                      fixed_12_t *key, fixed_12_t *value) {
+    *key = node->getKey();
+    *value = node->getValue();
+}

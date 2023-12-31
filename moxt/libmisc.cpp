@@ -8,8 +8,10 @@
 #include <absl/strings/escaping.h>
 #include <absl/strings/str_cat.h>
 #include <absl/strings/string_view.h>
+#include <atomic>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <exception>
 #include <nanobench.h>
 #include <photon/common/identity-pool.h>
@@ -27,8 +29,12 @@
 #include "moxt/utils/cast.hpp"
 #include <openssl/err.h>
 #include <openssl/opensslv.h>
-#include <snmalloc/override/new.cc>
+// #include <snmalloc/override/new.cc>
+#include <atomic>
+#include <parallel_hashmap/phmap.h>
 #include <snmalloc/snmalloc.h>
+
+using phmap::flat_hash_map;
 
 static int _constructor(int **ptr) {
     // printf("_constructor 10\n");
@@ -339,4 +345,44 @@ SEQ_FUNC void seq_test_spdlog() {
     // std::string_view sv = "hello";
     // spdlog::error("Some error message with arg: {}, {}", hello, sv);
     // spdlog::info(hello);
+}
+
+static flat_hash_map<int64_t, std::string *> readableStringCache;
+static std::atomic<int64_t> readableStringCacheKey = 0;
+
+SEQ_FUNC int64_t seq_get_next_cache_key() {
+    return readableStringCacheKey.fetch_add(1);
+}
+
+SEQ_FUNC const char *seq_set_string_in_cache(int64_t key, const char *value,
+                                             size_t valueLen) {
+    auto it = readableStringCache.find(key);
+    if (it != readableStringCache.end()) {
+        delete it->second;
+        it->second = new std::string(value, valueLen);
+    } else {
+        readableStringCache.emplace(key, new std::string(value, valueLen));
+    }
+    return readableStringCache[key]->c_str();
+}
+
+SEQ_FUNC const char *seq_get_string_in_cache(int64_t key, size_t *resultLen) {
+    auto it = readableStringCache.find(key);
+    if (it != readableStringCache.end()) {
+        *resultLen = it->second->size();
+        return it->second->c_str();
+    } else {
+        *resultLen = 0;
+        return nullptr;
+    }
+}
+
+SEQ_FUNC bool seq_free_string_in_cache(int64_t key) {
+    auto it = readableStringCache.find(key);
+    if (it != readableStringCache.end()) {
+        delete it->second;
+        readableStringCache.erase(it);
+        return true;
+    }
+    return false;
 }

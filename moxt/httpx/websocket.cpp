@@ -231,14 +231,14 @@ void WebSocket::OnRead(beast::error_code ec, std::size_t bytes_transferred) {
         bool reconnect = false;
         switch (ec.value()) {
         case asio::ssl::error::stream_errors::stream_truncated:
-            loge("Discord terminated websocket connection; reason: {} ({})",
+            loge("Server terminated websocket connection; reason: {} ({})",
                  _websocket->reason().reason.c_str(),
                  _websocket->reason().code);
 
             if (_websocket->reason().code == 4014) {
-                printf(" >> discord-connector: bot could not connect due to "
+                printf(" >> Server-connector: bot could not connect due to "
                        "intent "
-                       "permissions. Modify your discord bot settings and "
+                       "permissions. Modify your server bot settings and "
                        "enable every "
                        "intent.");
                 reconnect = false;
@@ -250,7 +250,7 @@ void WebSocket::OnRead(beast::error_code ec, std::size_t bytes_transferred) {
             // connection was closed, do nothing
             break;
         default:
-            loge("Can't read from Discord websocket gateway: {} ({})",
+            loge("Can't read from Server websocket gateway: {} ({})",
                  ec.message(), ec.value());
             reconnect = true;
             break;

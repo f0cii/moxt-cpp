@@ -352,11 +352,21 @@ SEQ_FUNC void seq_simdjson_dom_parser_free(dom::parser *parser) {
 
 SEQ_FUNC dom::element *
 seq_simdjson_dom_parser_parse(dom::parser *parser, const char *s, size_t len) {
-    // logd("seq_simdjson_dom_parser_parse body={} len={}",
-    //      std::string_view(s, len), len);
-    auto ret = mem_dup<dom::element>(parser->parse(std::string_view(s, len)));
-    // logd("seq_simdjson_dom_parser_parse ok");
-    return ret;
+    try {
+        auto ret =
+            mem_dup<dom::element>(parser->parse(std::string_view(s, len)));
+        return ret;
+    } catch (const simdjson::simdjson_error &e) {
+        std::string data(s, len);
+        printf("seq_simdjson_dom_parser_parse error: %s data: %s\n", e.what(), data.c_str());
+        // loge("seq_simdjson_dom_parser_parse error: {} data: {}", e.what(),
+        //      std::string_view(s, len));
+        return nullptr;
+    }
+}
+
+SEQ_FUNC bool seq_simdjson_dom_element_is_valid(dom::element *p) {
+    return p != nullptr;
 }
 
 SEQ_FUNC void seq_simdjson_dom_element_free(dom::element *p) {
@@ -492,8 +502,12 @@ DOM_GET_STR_VALUE_IMPL(element)
 #define DOM_GET_STR_GET_VALUE_IMPL(TYPE)                                       \
     SEQ_FUNC const char *seq_simdjson_dom_##TYPE##_get_str(                    \
         dom::TYPE *p, const char *key, size_t len, size_t *n) {                \
-        std::string_view s =                                                   \
-            (*p)[std::string_view(key, len)].get_string().value();             \
+        std::string_view s;                                                    \
+        auto ok = (*p)[std::string_view(key, len)].get(s);                     \
+        if (ok != SUCCESS) {                                                   \
+            *n = 0;                                                            \
+            return "";                                                         \
+        }                                                                      \
         *n = s.size();                                                         \
         return s.data();                                                       \
     }
