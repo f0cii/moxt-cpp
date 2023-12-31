@@ -52,6 +52,23 @@ template <typename K, typename V> class SkipList {
 
     void topN(int n, std::vector<OrderBookLevel_t> &v);
 
+    Node<K, V> *begin() const {
+        auto node = header->forward[0];
+        if (node == footer) {
+            return nullptr;
+        }
+        return node;
+    }
+
+    Node<K, V> *end() const { return nullptr; }
+
+    Node<K, V> *next(Node<K, V> *node) const {
+        if (node != nullptr && node->forward[0] != footer) {
+            return node->forward[0];
+        }
+        return nullptr;
+    }
+
     void dumpNodeDetail(Node<K, V> *node, int nodeLevel);
 
   private:

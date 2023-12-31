@@ -1,5 +1,6 @@
 #include "liblog.hpp"
 #include "libthread.hpp"
+#include "spdlog/common.h"
 // #include "spdlog/common.h"
 #include <absl/strings/match.h>
 #include <climits>
@@ -11,6 +12,40 @@
 #include <photon/thread/workerpool.h>
 #include <quill/Quill.h>
 
+#if defined(USE_FMTLOG)
+void logcb(int64_t ns, fmtlog::LogLevel level, fmt::string_view location,
+           size_t basePos, fmt::string_view threadName, fmt::string_view msg,
+           size_t bodyPos, size_t logFilePos) {
+    // Convert nanoseconds to hours, minutes, seconds, and milliseconds
+    auto hours = ns / 3600000000000;
+    auto minutes = (ns % 3600000000000) / 60000000000;
+    auto seconds = (ns % 60000000000) / 1000000000;
+    auto milliseconds = (ns % 1000000000) / 1000000;
+
+    // Format the time
+    auto timeStr = fmt::format("{:02}:{:02}:{:02}.{:03}", hours % 24, minutes,
+                               seconds, milliseconds);
+
+    // Map LogLevel to its corresponding string representation
+    std::string logLevelStr;
+    switch (level) {
+    case fmtlog::LogLevel::DBG:
+        logLevelStr = "DBG";
+        break;
+    case fmtlog::LogLevel::INF:
+        logLevelStr = "INF";
+        break;
+    case fmtlog::LogLevel::WRN:
+        logLevelStr = "WRN";
+        break;
+    case fmtlog::LogLevel::ERR:
+        logLevelStr = "ERR";
+        break;
+    }
+
+    fmt::print("## {}\n", msg);
+}
+
 void *coro_log_run(void *arg) {
     for (;;) {
         fmtlog::poll();
@@ -19,6 +54,7 @@ void *coro_log_run(void *arg) {
     }
     return nullptr;
 }
+#endif
 
 SEQ_FUNC void seq_init_log(uint8_t level, const char *filename,
                            size_t filenameLen) {
@@ -28,10 +64,34 @@ SEQ_FUNC void seq_init_log(uint8_t level, const char *filename,
 
 void init_log(uint8_t level, const std::string &filename) {
 #if defined(USE_FMTLOG)
-    fmtlog::setLogLevel(static_cast<fmtlog::LogLevel>(level));
+    auto logLevel = static_cast<fmtlog::LogLevel>(level);
+    fmtlog::setLogLevel(logLevel);
+    if (!filename.empty()) {
+        fmtlog::setLogFile(filename.c_str(), false);
+    }
+    fmtlog::setLogCB(logcb, logLevel);
     auto work_pool = seq_photon_work_pool();
     work_pool->thread_migrate(photon::thread_create(coro_log_run, nullptr),
                               -1UL);
+#elif defined(USE_SPDLOG)
+    switch (level) {
+    case 0:
+        spdlog::set_level(spdlog::level::debug);
+        break;
+    case 1:
+        spdlog::set_level(spdlog::level::info);
+        break;
+    case 2:
+        spdlog::set_level(spdlog::level::warn);
+        break;
+    case 3:
+        spdlog::set_level(spdlog::level::err);
+        break;
+    case 4:
+        spdlog::set_level(spdlog::level::off);
+        break;
+    }
+
 #else
     auto logLevel = static_cast<quill::LogLevel>(level);
     quill::get_logger()->set_log_level(logLevel); // quill::LogLevel::TraceL1

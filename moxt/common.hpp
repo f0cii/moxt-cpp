@@ -8,7 +8,7 @@
 #include <functional>
 #include <iostream>
 #include <map>
-#include <snmalloc/override/libc.h>
+// #include <snmalloc/override/libc.h>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -25,15 +25,23 @@
 #undef min
 #endif
 
-#define USE_FMTLOG 1
+// #define USE_FMTLOG 1
+#define USE_SPDLOG 1
 
-#if defined (USE_FMTLOG)
+#if defined(USE_FMTLOG)
 #include <fmtlog/fmtlog.h>
+#elif defined(USE_SPDLOG)
+#include <spdlog/spdlog.h>
+#define logd spdlog::debug
+#define logi spdlog::info
+#define logw spdlog::warn
+#define loge spdlog::error
 #else
 #include <quill/Quill.h>
 #define logd(fmt, ...) QUILL_LOG_DEBUG(quill::get_logger(), fmt, ##__VA_ARGS__)
 #define logi(fmt, ...) QUILL_LOG_INFO(quill::get_logger(), fmt, ##__VA_ARGS__)
-#define logw(fmt, ...) QUILL_LOG_WARNING(quill::get_logger(), fmt, ##__VA_ARGS__)
+#define logw(fmt, ...)                                                         \
+    QUILL_LOG_WARNING(quill::get_logger(), fmt, ##__VA_ARGS__)
 #define loge(fmt, ...) QUILL_LOG_ERROR(quill::get_logger(), fmt, ##__VA_ARGS__)
 #endif
 
