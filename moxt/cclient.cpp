@@ -39,7 +39,8 @@ CClient::~CClient() {}
 photon::net::cURL *CClient::get_cURL() {
     auto curl = curl_pool_->get();
     curl->reset_error();
-    curl->reset().clear_header();
+    // curl->reset().clear_header();
+    curl->clear_header();
     // curl->setopt(CURLOPT_SSL_VERIFYHOST, 0L);
     // curl->setopt(CURLOPT_SSL_VERIFYPEER, 0L);
     return curl;

@@ -189,6 +189,108 @@ int test_fixed12() {
     return 0;
 }
 
+SEQ_FUNC int64_t fixed_12_int_part(const fixed12_t &fixed) {
+    return fixed / FIXED_SCALE;
+}
+
+SEQ_FUNC int64_t fixed_12_frac_part(const fixed12_t &fixed) {
+    return fixed % FIXED_SCALE;
+}
+
+SEQ_FUNC fixed12_t fixed_12_new_string_n(const char *cstr, size_t len) {
+    std::string_view s(cstr, len);
+    return fixed_12_new_string_view(s);
+}
+
+SEQ_FUNC fixed12_t fixed_12_new_string_view(const std::string_view &s) {
+    size_t period = s.find('.');
+    long long i;
+    long long f;
+    int64_t sign = 1;
+    if (period == std::string_view::npos) {
+        i = strtoi(s);
+        if (i < 0) {
+            sign = -1;
+            i = -i;
+        }
+    } else {
+        if (period > 0) {
+            i = strtoi(s.substr(0, period));
+            if (i < 0) {
+                sign = -1;
+                i = -i;
+            }
+        }
+
+        std::string fs(s.substr(period + 1));
+        fs += std::string(12 - fs.length(), '0');
+        f = strtoi(fs.substr(0, 12));
+    }
+    fixed12_t fixed = sign * (i * FIXED_SCALE + f);
+    return fixed;
+}
+
+SEQ_FUNC size_t fixed_12_string_res(const fixed12_t fixed, char *result) {
+    // char result[16]; // Assuming the maximum length of the resulting string
+    // is
+    //  15 characters
+    int index = 0;
+
+    // Handle negative
+    int64_t intPart = fixed_12_int_part(fixed);
+    do {
+        result[index++] = '0' + intPart % 10;
+        intPart /= 10;
+    } while (intPart > 0);
+
+    // Reverse the integer part
+    for (int i = 0, j = index - 1; i < j; i++, j--) {
+        char temp = result[i];
+        result[i] = result[j];
+        result[j] = temp;
+    }
+
+    // Check if there is a decimal point
+
+    int64_t fracPart_ = fixed_12_frac_part(fixed);
+
+    if (fracPart_ > 0) {
+        // Add the decimal point
+        result[index++] = '.';
+
+        // Convert the fractional part to a string
+        std::string fracPart = std::to_string(fracPart_);
+        int fracPartLength = fracPart.length();
+        int zerosToAdd = MAX_FRAC_BITS - fracPartLength;
+        if (zerosToAdd > 0) {
+            // Add leading zeros if necessary
+            for (int i = 0; i < zerosToAdd; i++) {
+                result[index++] = '0';
+            }
+        }
+
+        // 计算小数位末尾0个数
+        int fracPartN = 0;
+        for (int i = fracPartLength - 1; i >= 0; i--) {
+            if (fracPart[i] == '0') {
+                fracPartN++;
+            } else {
+                break;
+            }
+        }
+
+        // Copy the non-zero digits of the fractional part
+        for (int i = 0; i < fracPartLength - fracPartN; i++) {
+            result[index++] = fracPart[i];
+        }
+    }
+
+    // Null-terminate
+    result[index] = '\0';
+
+    return strlen(result);
+}
+
 SEQ_FUNC int64_t seq_fixed_mul(int64_t a, int64_t b) {
     auto value = static_cast<big_int>(a) * static_cast<big_int>(b) /
                  static_cast<big_int>(FIXED_SCALE);
