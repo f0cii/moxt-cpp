@@ -1,5 +1,4 @@
 #include "libmisc.hpp"
-#include "fixed_12.hpp"
 #include "libc.hpp"
 #include "moxt/utils/floatutil.hpp"
 #include "photon/common/callback.h"

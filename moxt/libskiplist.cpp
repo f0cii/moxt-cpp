@@ -1,19 +1,19 @@
 #include "libskiplist.hpp"
-#include "fixed_12.hpp"
+#include "fixed12.hpp"
 
 SEQ_FUNC skiplist_t *seq_skiplist_new(bool isForward) {
     if (isForward) {
         // 999999.999999999999
-        auto f = fixed_12_new_string("999999.999999999999");
-        // 100000.0
-        // auto f = fixed_12_new_string("100000.0");
-        // printf("f: %ld\n", f.fp);
-        // printf("fs: %s\n", fixed_12_string(f).c_str());
-        return new skiplist_t(f, true);
+        // auto f = fixed_12_new_string("999999.999999999999");
+        // return new skiplist_t(f, true);
+        Fixed12 f = Fixed12::newSV("999999.999999999999");
+        return new skiplist_t(f.toValue(), true);
     } else {
-        auto f = fixed_12_new_string("0.0");
+        Fixed12 f = Fixed12::newSV("0.0");
+        // auto f = fixed_12_new_string("0.0");
         // printf("f: %ld\n", f.fp);
-        return new skiplist_t(f, false);
+        // return new skiplist_t(f, false);
+        return new skiplist_t(f.toValue(), true);
     }
 }
 
@@ -33,7 +33,7 @@ SEQ_FUNC int64_t seq_skiplist_remove(skiplist_t *list, int64_t key) {
     if (ok) {
         return value;
     } else {
-        return fixed_12_zero;
+        return Fixed12Zero.toValue();
     }
 }
 
@@ -42,11 +42,12 @@ SEQ_FUNC int64_t seq_skiplist_search(skiplist_t *list, int64_t key) {
     if (node != nullptr) {
         return node->getValue();
     } else {
-        return fixed_12_zero;
+        return Fixed12Zero.toValue();
     }
 }
 
-SEQ_FUNC void seq_skiplist_dump(skiplist_t *list) { list->dumpAllNodes(); }
+SEQ_FUNC void seq_skiplist_dump(skiplist_t *list) { // list->dumpAllNodes();
+}
 
 SEQ_FUNC void seq_skiplist_top_n(skiplist_t *list, int n, int64_t *keys,
                                  int64_t *values, size_t *resSize) {
@@ -61,21 +62,21 @@ SEQ_FUNC void seq_skiplist_top_n(skiplist_t *list, int n, int64_t *keys,
     *resSize = size;
 }
 
-SEQ_FUNC Node<fixed_12_t, fixed_12_t> *
+SEQ_FUNC Node<fixed12_t, fixed12_t> *
 seq_skiplist_begin(const skiplist_t *skipList) {
     return skipList->begin();
 }
 
-SEQ_FUNC Node<fixed_12_t, fixed_12_t> *seq_skiplist_end() { return nullptr; }
+SEQ_FUNC Node<fixed12_t, fixed12_t> *seq_skiplist_end() { return nullptr; }
 
-SEQ_FUNC Node<fixed_12_t, fixed_12_t> *
+SEQ_FUNC Node<fixed12_t, fixed12_t> *
 seq_skiplist_next(const skiplist_t *skipList,
-                  Node<fixed_12_t, fixed_12_t> *node) {
+                  Node<fixed12_t, fixed12_t> *node) {
     return skipList->next(node);
 }
 
-SEQ_FUNC void seq_skiplist_node_value(Node<fixed_12_t, fixed_12_t> *node,
-                                      fixed_12_t *key, fixed_12_t *value) {
+SEQ_FUNC void seq_skiplist_node_value(Node<fixed12_t, fixed12_t> *node,
+                                      fixed12_t *key, fixed12_t *value) {
     *key = node->getKey();
     *value = node->getValue();
 }

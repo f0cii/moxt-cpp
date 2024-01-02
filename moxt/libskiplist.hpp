@@ -2,7 +2,6 @@
 #define MOXT_LIBSLIST_HPP
 
 #include "common.hpp"
-#include "fixed_12.hpp"
 #include "skiplist/skiplist.hpp"
 
 SEQ_FUNC skiplist_t *seq_skiplist_new(bool isForward);
