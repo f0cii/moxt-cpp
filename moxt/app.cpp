@@ -3,15 +3,13 @@
 //
 
 #include "app.hpp"
-
 #include "moxt/httpx/asio_ioc.hpp"
 #include "moxt/utils/tsc_time.hpp"
-#include <stdexcept>
-#include <execinfo.h>
-#include <exception>
-#include <stdexcept>
-#include <cstdlib>
 #include <csignal>
+#include <cstdlib>
+#include <exception>
+#include <execinfo.h>
+#include <stdexcept>
 
 // This function is used for handle segmental fault
 inline void segfaultHandler(int signal __attribute__((unused))) {

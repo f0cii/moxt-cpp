@@ -1,5 +1,6 @@
 #include "libthread.hpp"
 #include "common.hpp"
+#include "moxt/cclient.hpp"
 #include <chrono>
 #include <cmath>
 #include <csignal>
@@ -61,12 +62,7 @@ SEQ_FUNC int seq_photon_init_default() {
         return ret;
     }
 
-    // #ifdef __linux__
-    //     ret = photon::net::et_poller_init();
-    //     if (ret < 0)
-    //         return -1;
-    //     // DEFER(net::et_poller_fini());
-    // #endif
+    init_curl_pool();
 
     return 0;
 }

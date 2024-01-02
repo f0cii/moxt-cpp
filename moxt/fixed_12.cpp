@@ -113,7 +113,7 @@ std::string fixed_12_string(const fixed_12_t fixed) {
             }
         }
 
-        // ¼ÆËãÐ¡ÊýÎ»Ä©Î²0¸öÊý
+        // è®¡ç®—å°æ•°ä½æœ«å°¾0ä¸ªæ•°
         int fracPartN = 0;
         for (int i = fracPartLength - 1; i >= 0; i--) {
             if (fracPart[i] == '0') {
@@ -174,7 +174,7 @@ SEQ_FUNC size_t fixed_12_string_res(const fixed_12_t fixed, char *result) {
             }
         }
 
-        // ¼ÆËãÐ¡ÊýÎ»Ä©Î²0¸öÊý
+        // è®¡ç®—å°æ•°ä½æœ«å°¾0ä¸ªæ•°
         int fracPartN = 0;
         for (int i = fracPartLength - 1; i >= 0; i--) {
             if (fracPart[i] == '0') {

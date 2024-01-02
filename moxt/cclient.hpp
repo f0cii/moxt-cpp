@@ -2,16 +2,24 @@
 #define MOXT_CCLIENT_HPP
 
 #include "common.hpp"
-#include "moxt/client.hpp"
 #include "moxt/httpx/clientpool.hpp"
 #include "moxt/httpx/httpbase.hpp"
 #include "moxt/httpx/httpclient.hpp"
 #include <photon/common/identity-pool.h>
+#include <photon/photon.h>
 #include <photon/net/curl.h>
+#include <photon/net/http/verb.h>
 
 using namespace std;
 
 typedef IdentityPool<photon::net::cURL, 10> CURLPool;
+
+constexpr int64_t VERB_UNKNOWN = 0;
+constexpr int64_t VERB_DELETE = 1;
+constexpr int64_t VERB_GET = 2;
+constexpr int64_t VERB_HEAD = 3;
+constexpr int64_t VERB_POST = 4;
+constexpr int64_t VERB_PUT = 5;
 
 class CClient {
   public:
@@ -24,33 +32,19 @@ class CClient {
 
     ~CClient();
 
-    // CHttpResponse doRequestSync(const std::string &path, HttpVerb verb,
-    //                         std::map<std::string, std::string> &headers,
-    //                         const std::string &body, bool debug);
-
-    CHttpResponse doRequest(const std::string &path, HttpVerb verb,
+    CHttpResponse doRequest(const std::string &path, photon::net::http::Verb verb,
                             std::map<std::string, std::string> &headers,
                             const std::string &body, bool debug);
 
-    // // 执行请求的统一方法
-    // int64_t doRequest(const char *path, size_t path_len, int64_t verb,
-    //                   std::map<std::string, std::string> *headers,
-    //                   const char *body, size_t body_len, char *res, size_t
-    //                   *n, bool debug = false);
-
   private:
-    photon::net::cURL *get_cURL() {
-        auto curl = curl_pool_->get();
-        curl->reset_error();
-        curl->reset().clear_header();
-        return curl;
-    };
+    photon::net::cURL *get_cURL();
 
-    void release_cURL(photon::net::cURL *curl) { curl_pool_->put(curl); };
+    void release_cURL(photon::net::cURL *curl);
     string baseUrl;
     string host;
-    CURLPool *curl_pool_;
 };
+
+void init_curl_pool();
 
 SEQ_FUNC CClient *seq_cclient_new(const char *baseUrl, size_t baseUrl_len,
                                   int64_t method);
