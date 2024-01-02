@@ -116,7 +116,9 @@ class Fixed12 {
     // static constexpr int MAX_FRAC_BITS = 12;
 };
 
-struct OrderBookLevel_t {
+typedef int64_t fixed12_t;
+
+struct OrderBookLevel {
     Fixed12 price;
     Fixed12 qty;
 };

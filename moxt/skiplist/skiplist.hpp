@@ -11,7 +11,6 @@
 
 #include "Node.h"
 #include "moxt/fixed12.hpp"
-#include "moxt/fixed_12.hpp"
 #include "random.h"
 #include <cassert>
 #include <cstddef>
@@ -49,8 +48,6 @@ template <typename K, typename V> class SkipList {
     void topN(int n, std::vector<std::pair<K, V>> &v);
 
     void topN(int n, std::vector<OrderBookLevel> &v);
-
-    void topN(int n, std::vector<OrderBookLevel_t> &v);
 
     Node<K, V> *begin() const {
         auto node = header->forward[0];
@@ -222,10 +219,12 @@ template <typename K, typename V> void SkipList<K, V>::dumpAllNodes() {
         if (node == nullptr) {
             continue;
         }
-        // cout << "node->key:" << node->key << ",node->value:" << node->value
+        // cout << "node->key:" << node->key << ",node->value:" <<
+        // node->value
         // << endl;
-        cout << "node-> key: " << fixed_12_string_fp(node->key).c_str()
-             << " value: " << fixed_12_string_fp(node->value).c_str() << endl;
+        cout << "node-> key: " << Fixed12::newV(node->key).toString().c_str()
+             << " value: " << Fixed12::newV(node->value).toString().c_str()
+             << endl;
         // printf("key:%s value:%s\n", fixed_12_string_fp(node->key).c_str(),
         // fixed_12_string_fp(node->value).c_str()); cout <<
         // "----------------------------" << endl;
@@ -252,23 +251,6 @@ void SkipList<K, V>::topN(int n, std::vector<std::pair<K, V>> &v) {
 
 template <typename K, typename V>
 void SkipList<K, V>::topN(int n, std::vector<OrderBookLevel> &v) {
-    Node<K, V> *node = header;
-    int count = 0;
-    while (node->forward[0] != footer) {
-        if (count >= n) {
-            break;
-        }
-        node = node->forward[0];
-        if (node == nullptr) {
-            continue;
-        }
-        v.push_back(OrderBookLevel(node->key, node->value));
-        ++count;
-    }
-}
-
-template <typename K, typename V>
-void SkipList<K, V>::topN(int n, std::vector<OrderBookLevel_t> &v) {
     Node<K, V> *node = header;
     int count = 0;
     while (node->forward[0] != footer) {
@@ -351,6 +333,6 @@ template <typename K, typename V> int SkipList<K, V>::getRandomLevel() {
 }
 
 // typedef SkipList<int64_t, int64_t> skiplist_t;
-typedef SkipList<fixed_12_t, fixed_12_t> skiplist_t;
+typedef SkipList<fixed12_t, fixed12_t> skiplist_t;
 
 #endif // SKIPLISTPRO_SKIPLIST_H
