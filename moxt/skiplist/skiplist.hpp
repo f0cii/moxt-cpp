@@ -332,7 +332,6 @@ template <typename K, typename V> int SkipList<K, V>::getRandomLevel() {
     return level;
 }
 
-// typedef SkipList<int64_t, int64_t> skiplist_t;
 typedef SkipList<fixed12_t, fixed12_t> skiplist_t;
 
 #endif // SKIPLISTPRO_SKIPLIST_H
