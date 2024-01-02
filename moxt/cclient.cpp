@@ -111,14 +111,6 @@ SEQ_FUNC int64_t seq_cclient_do_request(
     // logd("seq_client_do_request");
     std::string reqeustPath = std::string(path, path_len);
     std::string body_(body, body_len);
-    /*
-    constexpr int64_t VERB_UNKNOWN = 0;
-constexpr int64_t VERB_DELETE = 1;
-constexpr int64_t VERB_GET = 2;
-constexpr int64_t VERB_HEAD = 3;
-constexpr int64_t VERB_POST = 4;
-constexpr int64_t VERB_PUT = 5;
-    */
     photon::net::http::Verb v = photon::net::http::Verb::GET;
     if (verb == VERB_DELETE) {
         v = photon::net::http::Verb::DELETE;

@@ -46,8 +46,7 @@ SEQ_FUNC int64_t seq_skiplist_search(skiplist_t *list, int64_t key) {
     }
 }
 
-SEQ_FUNC void seq_skiplist_dump(skiplist_t *list) { // list->dumpAllNodes();
-}
+SEQ_FUNC void seq_skiplist_dump(skiplist_t *list) { list->dumpAllNodes(); }
 
 SEQ_FUNC void seq_skiplist_top_n(skiplist_t *list, int n, int64_t *keys,
                                  int64_t *values, size_t *resSize) {
