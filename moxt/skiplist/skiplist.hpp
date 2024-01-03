@@ -261,7 +261,7 @@ void SkipList<K, V>::topN(int n, std::vector<OrderBookLevel> &v) {
         if (node == nullptr) {
             continue;
         }
-        v.push_back(OrderBookLevel_t(Fixed12::newV(node->key),
+        v.push_back(OrderBookLevel(Fixed12::newV(node->key),
                                      Fixed12::newV(node->value)));
         ++count;
     }
