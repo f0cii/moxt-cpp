@@ -4,16 +4,16 @@
 SEQ_FUNC skiplist_t *seq_skiplist_new(bool isForward) {
     if (isForward) {
         // 999999.999999999999
-        // auto f = fixed_12_new_string("999999.999999999999");
-        // return new skiplist_t(f, true);
-        Fixed12 f = Fixed12::newSV("999999.999999999999");
-        return new skiplist_t(f.toValue(), true);
+        auto f = fixed_12_new_string_view("999999.999999999999");
+        return new skiplist_t(f, true);
+        // Fixed12 f = Fixed12::newSV("999999.999999999999");
+        // return new skiplist_t(f.toValue(), true);
     } else {
-        Fixed12 f = Fixed12::newSV("0.0");
-        // auto f = fixed_12_new_string("0.0");
+        auto f = fixed_12_new_string_view("0.0");
         // printf("f: %ld\n", f.fp);
-        // return new skiplist_t(f, false);
-        return new skiplist_t(f.toValue(), true);
+        return new skiplist_t(f, false);
+        // Fixed12 f = Fixed12::newSV("0.0");
+        // return new skiplist_t(f.toValue(), false);
     }
 }
 

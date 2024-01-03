@@ -9,10 +9,12 @@
 CURLPool *new_curl_pool() {
     auto _ctor = [](photon::net::cURL **ptr) -> int {
         *ptr = new photon::net::cURL();
+        logi("new photon::net::cURL()");
         return 0;
     };
     auto _dtor = [](photon::net::cURL *ptr) -> int {
         delete ptr;
+        logi("delete photon::net::cURL");
         return 0;
     };
 
@@ -39,8 +41,7 @@ CClient::~CClient() {}
 photon::net::cURL *CClient::get_cURL() {
     auto curl = curl_pool_->get();
     curl->reset_error();
-    // curl->reset().clear_header();
-    curl->clear_header();
+    curl->reset().clear_header();
     // curl->setopt(CURLOPT_SSL_VERIFYHOST, 0L);
     // curl->setopt(CURLOPT_SSL_VERIFYPEER, 0L);
     return curl;
@@ -83,6 +84,62 @@ CHttpResponse CClient::doRequest(const std::string &path,
                            timeout * 1000000);
     } else {
         ret = client->GET(request_url.c_str(), &writer, timeout * 1000000);
+    }
+
+    if (ret != 200) {
+        logw("connect to server failed. http response code: {}", ret);
+        return CHttpResponse{
+            500, fmt::format("请求失败 status={} body={}", ret, writer.string)};
+    }
+
+    return CHttpResponse{static_cast<uint64_t>(ret), writer.string};
+}
+
+CHttpResponse
+CClient::doRequestTest(const std::string &path, photon::net::http::Verb verb,
+                       std::map<std::string, std::string> &headers,
+                       const std::string &body, bool debug) {
+    auto client = get_cURL();
+    if (client == nullptr) {
+        return CHttpResponse{400, "Failed to acquire client"};
+    }
+    DEFER(release_cURL(client));
+
+    client->set_verbose(true);
+    photon::net::HeaderMap resHeaders;
+    client->set_header_container(&resHeaders);
+
+    client->append_header("Host", host);
+    client->append_header("User-Agent", "xt/1.0.1");
+
+    // logd("--------------header--------------");
+    for (auto &a : headers) {
+        // logd("{}={}", a.first, a.second);
+        client->append_header(a.first, a.second);
+    }
+
+    std::string request_url = "https://" + host + path;
+
+    int64_t timeout = 10;
+    photon::net::StringWriter writer;
+    // photon::net::DummyReaderWriter writer; // dummy
+    long ret;
+    if (verb == photon::net::http::Verb::GET) {
+        ret = client->GET(request_url.c_str(), &writer, timeout * 1000000);
+    } else if (verb == photon::net::http::Verb::POST) {
+        client->append_header("Content-Type", "application/json");
+        client->append_header("Content-Length", fmt::to_string(body.size()));
+        photon::net::BufReader body_(body.c_str(), body.length());
+
+        ret = client->POST(request_url.c_str(), &body_, &writer,
+                           timeout * 1000000);
+    } else {
+        ret = client->GET(request_url.c_str(), &writer, timeout * 1000000);
+    }
+
+    logi("response headers: ");
+    for (auto i : resHeaders) {
+        logi("{}={}", i.first, i.second);
     }
 
     if (ret != 200) {

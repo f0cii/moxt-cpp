@@ -32,9 +32,15 @@ class CClient {
 
     ~CClient();
 
-    CHttpResponse doRequest(const std::string &path, photon::net::http::Verb verb,
+    CHttpResponse doRequest(const std::string &path,
+                            photon::net::http::Verb verb,
                             std::map<std::string, std::string> &headers,
                             const std::string &body, bool debug);
+
+    CHttpResponse doRequestTest(const std::string &path,
+                                photon::net::http::Verb verb,
+                                std::map<std::string, std::string> &headers,
+                                const std::string &body, bool debug);
 
   private:
     photon::net::cURL *get_cURL();
