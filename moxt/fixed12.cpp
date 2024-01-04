@@ -189,20 +189,20 @@ int test_fixed12() {
     return 0;
 }
 
-SEQ_FUNC int64_t fixed_12_int_part(const fixed12_t &fixed) {
+SEQ_FUNC int64_t fixed12_int_part(const fixed12_t &fixed) {
     return fixed / FIXED_SCALE;
 }
 
-SEQ_FUNC int64_t fixed_12_frac_part(const fixed12_t &fixed) {
+SEQ_FUNC int64_t fixed12_frac_part(const fixed12_t &fixed) {
     return fixed % FIXED_SCALE;
 }
 
-SEQ_FUNC fixed12_t fixed_12_new_string_n(const char *cstr, size_t len) {
+SEQ_FUNC fixed12_t seq_fixed12_new_string(const char *cstr, size_t len) {
     std::string_view s(cstr, len);
-    return fixed_12_new_string_view(s);
+    return fixed12_new_string_view(s);
 }
 
-SEQ_FUNC fixed12_t fixed_12_new_string_view(const std::string_view &s) {
+SEQ_FUNC fixed12_t fixed12_new_string_view(const std::string_view &s) {
     size_t period = s.find('.');
     long long i;
     long long f;
@@ -230,14 +230,11 @@ SEQ_FUNC fixed12_t fixed_12_new_string_view(const std::string_view &s) {
     return fixed;
 }
 
-SEQ_FUNC size_t fixed_12_string_res(const fixed12_t fixed, char *result) {
-    // char result[16]; // Assuming the maximum length of the resulting string
-    // is
-    //  15 characters
+SEQ_FUNC size_t seq_fixed12_to_string(const fixed12_t fixed, char *result) {
     int index = 0;
 
     // Handle negative
-    int64_t intPart = fixed_12_int_part(fixed);
+    int64_t intPart = fixed12_int_part(fixed);
     do {
         result[index++] = '0' + intPart % 10;
         intPart /= 10;
@@ -252,7 +249,7 @@ SEQ_FUNC size_t fixed_12_string_res(const fixed12_t fixed, char *result) {
 
     // Check if there is a decimal point
 
-    int64_t fracPart_ = fixed_12_frac_part(fixed);
+    int64_t fracPart_ = fixed12_frac_part(fixed);
 
     if (fracPart_ > 0) {
         // Add the decimal point
