@@ -358,7 +358,8 @@ seq_simdjson_dom_parser_parse(dom::parser *parser, const char *s, size_t len) {
         return ret;
     } catch (const simdjson::simdjson_error &e) {
         std::string data(s, len);
-        printf("seq_simdjson_dom_parser_parse error: %s data: %s\n", e.what(), data.c_str());
+        printf("seq_simdjson_dom_parser_parse error: %s data: %s\n", e.what(),
+               data.c_str());
         // loge("seq_simdjson_dom_parser_parse error: {} data: {}", e.what(),
         //      std::string_view(s, len));
         return nullptr;
@@ -385,7 +386,7 @@ seq_simdjson_dom_document_get_element(dom::element *document, const char *key,
         dom::TYPE *p, const char *key, size_t len) {                           \
         U res;                                                                 \
         auto ok = (*p)[std ::string_view(key, len)].get(res);                  \
-        return res ? ok == SUCCESS : (D);                                      \
+        return ok == SUCCESS ? res : (D);                                      \
     }
 
 #define DOM_ELEMENT_GET_IMPL(N, U, FUNC)                                       \
@@ -406,13 +407,14 @@ seq_simdjson_dom_document_get_element(dom::element *document, const char *key,
     }
 
 DOM_GET_VALUE_IMPL(element, int, int64_t, get_int64, 0)
-// int64_t seq_simdjson_dom_element_get_int(dom ::element *p,
-//                                                     const char *key,
-//                                                     size_t len) {
-//   //return (*p)[std ::string_view(key, len)].get_int64();
-//   int64_t res;
-//   auto ok = (*p)[std ::string_view(key, len)].get(res);
-//     return res ? ok == SUCCESS : 0;
+// SEQ_FUNC int64_t seq_simdjson_dom_element_get_int(dom ::element *p,
+//                                                   const char *key, size_t
+//                                                   len) {
+//     // return (*p)[std ::string_view(key, len)].get_int64();
+//     auto key_ = std ::string_view(key, len);
+//     int64_t res;
+//     auto ok = (*p)[key_].get(res);
+//     return ok == SUCCESS ? res : 0;
 // }
 
 DOM_GET_VALUE_IMPL(element, uint, uint64_t, get_uint64, 0)

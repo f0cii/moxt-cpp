@@ -112,8 +112,6 @@ class Fixed12 {
 
   private:
     int64_t value_;
-    // static constexpr int64_t FIXED_SCALE = 1000000000000;
-    // static constexpr int MAX_FRAC_BITS = 12;
 };
 
 typedef int64_t fixed12_t;
@@ -127,15 +125,15 @@ const Fixed12 Fixed12Zero = Fixed12::newI(0);
 const Fixed12 Fixed12One = Fixed12::newI(1);
 const Fixed12 Fixed12Two = Fixed12::newI(2);
 
-SEQ_FUNC int64_t fixed_12_int_part(const fixed12_t &fixed);
+SEQ_FUNC int64_t fixed12_int_part(const fixed12_t &fixed);
 
-SEQ_FUNC int64_t fixed_12_frac_part(const fixed12_t &fixed);
+SEQ_FUNC int64_t fixed12_frac_part(const fixed12_t &fixed);
 
-SEQ_FUNC fixed12_t fixed_12_new_string_n(const char *cstr, size_t len);
+SEQ_FUNC fixed12_t fixed12_new_string_view(const std::string_view &s);
 
-SEQ_FUNC fixed12_t fixed_12_new_string_view(const std::string_view &s);
+SEQ_FUNC fixed12_t seq_fixed12_new_string(const char *cstr, size_t len);
 
-SEQ_FUNC size_t fixed_12_string_res(const fixed12_t fixed, char *result);
+SEQ_FUNC size_t seq_fixed12_to_string(const fixed12_t fixed, char *result);
 
 // 自定义*
 SEQ_FUNC int64_t seq_fixed_mul(int64_t a, int64_t b);

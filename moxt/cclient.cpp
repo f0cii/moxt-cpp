@@ -59,6 +59,12 @@ CHttpResponse CClient::doRequest(const std::string &path,
     }
     DEFER(release_cURL(client));
 
+    photon::net::HeaderMap resHeaders;
+    if (debug) {
+        client->set_verbose(true);
+        client->set_header_container(&resHeaders);
+    }
+
     client->append_header("Host", host);
     client->append_header("User-Agent", "xt/1.0.1");
 
@@ -70,20 +76,38 @@ CHttpResponse CClient::doRequest(const std::string &path,
 
     std::string request_url = "https://" + host + path;
 
-    int64_t timeout = 10;
+    int64_t timeout = 5;
     photon::net::StringWriter writer;
     long ret;
-    if (verb == photon::net::http::Verb::GET) {
+    if (verb == photon::net::http::Verb::DELETE) {
+        ret = client->DELETE(request_url.c_str(), &writer, timeout * 1000000);
+    } else if (verb == photon::net::http::Verb::GET) {
         ret = client->GET(request_url.c_str(), &writer, timeout * 1000000);
+    } else if (verb == photon::net::http::Verb::HEAD) {
+        ret = client->HEAD(request_url.c_str(), &writer, timeout * 1000000);
     } else if (verb == photon::net::http::Verb::POST) {
-        client->append_header("Content-Type", "application/json");
-        client->append_header("Content-Length", fmt::to_string(body.size()));
+        // client->append_header("Content-Type", "application/json");
+        // client->append_header("Content-Length", fmt::to_string(body.size()));
         photon::net::BufReader body_(body.c_str(), body.length());
 
         ret = client->POST(request_url.c_str(), &body_, &writer,
                            timeout * 1000000);
+    } else if (verb == photon::net::http::Verb::PUT) {
+        // client->append_header("Content-Type", "application/json");
+        // client->append_header("Content-Length", fmt::to_string(body.size()));
+        photon::net::BufReader body_(body.c_str(), body.length());
+
+        ret = client->PUT(request_url.c_str(), &body_, &writer,
+                          timeout * 1000000);
     } else {
         ret = client->GET(request_url.c_str(), &writer, timeout * 1000000);
+    }
+
+    if (debug) {
+        // logd("response headers: ");
+        for (auto i : resHeaders) {
+            logd("{}={}", i.first, i.second);
+        }
     }
 
     if (ret != 200) {
@@ -120,19 +144,30 @@ CClient::doRequestTest(const std::string &path, photon::net::http::Verb verb,
 
     std::string request_url = "https://" + host + path;
 
-    int64_t timeout = 10;
+    int64_t timeout = 5;
     photon::net::StringWriter writer;
     // photon::net::DummyReaderWriter writer; // dummy
     long ret;
-    if (verb == photon::net::http::Verb::GET) {
+    if (verb == photon::net::http::Verb::DELETE) {
+        ret = client->DELETE(request_url.c_str(), &writer, timeout * 1000000);
+    } else if (verb == photon::net::http::Verb::GET) {
         ret = client->GET(request_url.c_str(), &writer, timeout * 1000000);
+    } else if (verb == photon::net::http::Verb::HEAD) {
+        ret = client->HEAD(request_url.c_str(), &writer, timeout * 1000000);
     } else if (verb == photon::net::http::Verb::POST) {
-        client->append_header("Content-Type", "application/json");
-        client->append_header("Content-Length", fmt::to_string(body.size()));
+        // client->append_header("Content-Type", "application/json");
+        // client->append_header("Content-Length", fmt::to_string(body.size()));
         photon::net::BufReader body_(body.c_str(), body.length());
 
         ret = client->POST(request_url.c_str(), &body_, &writer,
                            timeout * 1000000);
+    } else if (verb == photon::net::http::Verb::PUT) {
+        // client->append_header("Content-Type", "application/json");
+        // client->append_header("Content-Length", fmt::to_string(body.size()));
+        photon::net::BufReader body_(body.c_str(), body.length());
+
+        ret = client->PUT(request_url.c_str(), &body_, &writer,
+                          timeout * 1000000);
     } else {
         ret = client->GET(request_url.c_str(), &writer, timeout * 1000000);
     }
@@ -165,8 +200,8 @@ SEQ_FUNC void seq_cclient_free(CClient *client) {
 SEQ_FUNC int64_t seq_cclient_do_request(
     CClient *client, const char *path, size_t path_len, int64_t verb,
     std::map<std::string, std::string> *headers, const char *body,
-    size_t body_len, char *res, size_t *n) {
-    // logd("seq_client_do_request");
+    size_t body_len, char *res, size_t *n, bool verbose) {
+    // logd("seq_cclient_do_request");
     std::string reqeustPath = std::string(path, path_len);
     std::string body_(body, body_len);
     photon::net::http::Verb v = photon::net::http::Verb::GET;
@@ -181,8 +216,8 @@ SEQ_FUNC int64_t seq_cclient_do_request(
     } else if (verb == VERB_PUT) {
         v = photon::net::http::Verb::PUT;
     }
-    auto result = client->doRequest(reqeustPath, v, *headers, body_, false);
-    // logd("seq_client_do_request success");
+    auto result = client->doRequest(reqeustPath, v, *headers, body_, verbose);
+    // logd("seq_cclient_do_request success");
     auto &res_body = result.body;
     memcpy(res, res_body.c_str(), res_body.length());
     *n = res_body.length();
