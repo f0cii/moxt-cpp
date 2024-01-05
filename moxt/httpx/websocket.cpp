@@ -131,7 +131,7 @@ void WebSocket::OnSslHandshake(beast::error_code ec) {
         [](beast::websocket::request_type &req) {
             req.set(beast::http::field::user_agent,
                     std::string(BOOST_BEAST_VERSION_STRING) +
-                        " samp-discord-connector");
+                        " xt-connector");
         }));
 
     _websocket->async_handshake(

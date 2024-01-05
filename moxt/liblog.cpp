@@ -69,7 +69,7 @@ void init_log(uint8_t level, const std::string &filename) {
     if (!filename.empty()) {
         fmtlog::setLogFile(filename.c_str(), false);
     }
-    fmtlog::setLogCB(logcb, logLevel);
+    // fmtlog::setLogCB(logcb, logLevel);
     auto work_pool = seq_photon_work_pool();
     work_pool->thread_migrate(photon::thread_create(coro_log_run, nullptr),
                               -1UL);
