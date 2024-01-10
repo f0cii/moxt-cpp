@@ -42,7 +42,8 @@ template <typename T> void mem_delete(T *obj) {
 #endif
 }
 
-SEQ_FUNC int64_t seq_address_of(void *p);
+SEQ_FUNC int64_t seq_voidptr_to_int(void *p);
+SEQ_FUNC void *seq_int_to_voidptr(int64_t i);
 
 // #define ct_new new
 // #define ct_dup new

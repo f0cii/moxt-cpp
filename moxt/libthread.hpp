@@ -9,12 +9,35 @@
 #include <photon/thread/thread-pool.h>
 #include <photon/thread/thread.h>
 #include <photon/thread/thread11.h>
+#include <photon/thread/timer.h>
 #include <photon/thread/workerpool.h>
 
 #include "libfar.hpp"
 
 typedef void *(*task_entry)(void *arg);
 typedef void (*task_callback)(void *result);
+typedef uint64_t (*timer_entry)();
+typedef uint64_t (*timed_closure_entry)(int64_t c);
+
+class TimedClosureExecutor {
+  public:
+    TimedClosureExecutor(uint64_t default_timeout, timed_closure_entry entry,
+                         int64_t closurePtr, bool repeating)
+        : _onTimer(entry), _closurePtr(closurePtr) {
+        _timer = new photon::Timer(
+            default_timeout, {this, &TimedClosureExecutor::onTick}, repeating);
+    }
+    ~TimedClosureExecutor() { delete _timer; }
+
+    uint64_t onTick() { return _onTimer(_closurePtr); }
+
+    photon::Timer *getTimer() { return _timer; }
+
+  private:
+    photon::Timer *_timer;
+    timed_closure_entry _onTimer;
+    int64_t _closurePtr;
+};
 
 SEQ_FUNC void seq_init_photon_work_pool(size_t vcpu_num);
 
@@ -24,6 +47,8 @@ SEQ_FUNC void
 seq_photon_thread_create_and_migrate_to_work_pool(task_entry entry, void *arg);
 
 SEQ_FUNC void seq_photon_thread_migrate_to_work_pool(photon::thread *th);
+
+SEQ_FUNC void seq_photon_set_log_output(uint8_t mode);
 
 SEQ_FUNC int seq_photon_init_default();
 
@@ -106,5 +131,25 @@ typedef void (*signal_handle_t)(int sig);
 SEQ_FUNC void seq_init_signal(signal_handle_t handle);
 
 SEQ_FUNC void seq_init_photon_signal(signal_handle_t handle);
+
+SEQ_FUNC TimedClosureExecutor *
+seq_photon_timed_closure_executor_new(uint64_t default_timeout,
+                                      timed_closure_entry entry,
+                                      int64_t closurePtr, bool repeating);
+
+SEQ_FUNC void
+seq_photon_timed_closure_executor_free(TimedClosureExecutor *executor);
+
+SEQ_FUNC photon::Timer *
+seq_photon_timed_closure_executor_get_timer(TimedClosureExecutor *executor);
+
+SEQ_FUNC photon::Timer *seq_photon_timer_new(uint64_t default_timeout,
+                                             timer_entry entry, bool repeating);
+
+SEQ_FUNC int seq_photon_timer_reset(photon::Timer *timer, uint64_t new_timeout);
+
+SEQ_FUNC int seq_photon_timer_cancel(photon::Timer *timer);
+
+SEQ_FUNC int seq_photon_timer_stop(photon::Timer *timer);
 
 #endif

@@ -1,6 +1,8 @@
 #include "libthread.hpp"
 #include "common.hpp"
 #include "moxt/cclient.hpp"
+#include "photon/photon.h"
+#include "photon/thread/thread.h"
 #include <chrono>
 #include <cmath>
 #include <csignal>
@@ -9,6 +11,7 @@
 #include <photon/net/http/client.h>
 #include <photon/net/socket.h>
 #include <photon/thread/thread-pool.h>
+#include <photon/thread/stack-allocator.h>
 
 static photon::WorkPool *work_pool = nullptr;
 
@@ -18,7 +21,7 @@ SEQ_FUNC void seq_init_photon_work_pool(size_t vcpu_num) {
     // work_pool = new photon::WorkPool(pool_size, photon::INIT_EVENT_EPOLL,
     // 64);
     work_pool = new photon::WorkPool(vcpu_num, photon::INIT_EVENT_DEFAULT,
-                                     photon::INIT_IO_NONE);
+                                     photon::INIT_IO_DEFAULT);
 }
 
 SEQ_FUNC void
@@ -49,28 +52,34 @@ void free_far(FuncArgResult *far) {
     }
 }
 
-SEQ_FUNC int seq_photon_init_default() {
-    // set_log_output(log_output_stdout);
+SEQ_FUNC void seq_photon_set_log_output(uint8_t mode) {
     // set_log_output_level(ALOG_INFO);
-    set_log_output(log_output_null);
+    if (mode == 0) {
+        set_log_output(log_output_stdout);
+    } else {
+        set_log_output(log_output_null);
+    }
+}
 
-    // int ret = photon::init(photon::INIT_EVENT_DEFAULT, photon::INIT_IO_NONE);
-    int ret = photon::init(photon::INIT_EVENT_DEFAULT, photon::INIT_IO_LIBCURL);
-    // int ret = photon::init(photon::INIT_EVENT_DEFAULT,
-    // photon::INIT_IO_LIBAIO);
+SEQ_FUNC int seq_photon_init_default() {
+    // photon::set_photon_thread_stack_allocator();
+    photon::use_pooled_stack_allocator();
+    // photon::set_bypass_threadpool();
+    int ret = photon::init(photon::INIT_EVENT_DEFAULT, photon::INIT_IO_DEFAULT);
     if (ret != 0) {
         return ret;
     }
 
+    // curl_global_init(CURL_GLOBAL_DEFAULT);
     init_curl_pool();
 
     return 0;
 }
 
 SEQ_FUNC int seq_photon_init() {
-    // int ret = photon::init(photon::INIT_EVENT_DEFAULT, photon::INIT_IO_NONE);
-    int ret = photon::init(photon::INIT_EVENT_DEFAULT, photon::INIT_IO_LIBAIO);
-    // if (ret < 0) {
+    int ret = photon::init(photon::INIT_EVENT_DEFAULT, photon::INIT_IO_DEFAULT);
+    // int ret = photon::init(photon::INIT_EVENT_DEFAULT,
+    // photon::INIT_IO_LIBAIO); if (ret < 0) {
     //     LOG_ERROR_RETURN(0, -1, "failed to init photon environment");
     // }
     return ret;
@@ -79,7 +88,10 @@ SEQ_FUNC int seq_photon_init() {
 SEQ_FUNC void seq_photon_fini() { photon::fini(); }
 
 SEQ_FUNC photon::WorkPool *seq_photon_workpool_new(size_t pool_size) {
-    auto pool = new photon::WorkPool(pool_size, photon::INIT_EVENT_EPOLL, 64);
+    // auto pool = new photon::WorkPool(pool_size, photon::INIT_EVENT_EPOLL,
+    // 64);
+    auto pool = new photon::WorkPool(pool_size, photon::INIT_EVENT_DEFAULT,
+                                     photon::INIT_IO_DEFAULT);
     return pool;
 }
 
@@ -316,4 +328,140 @@ SEQ_FUNC void seq_init_signal(signal_handle_t handle) {
 SEQ_FUNC void seq_init_photon_signal(signal_handle_t handle) {
     photon::sync_signal(SIGTERM, handle);
     photon::sync_signal(SIGINT, handle);
+}
+
+SEQ_FUNC TimedClosureExecutor *
+seq_photon_timed_closure_executor_new(uint64_t default_timeout,
+                                      timed_closure_entry entry,
+                                      int64_t closurePtr, bool repeating) {
+    TimedClosureExecutor *executor =
+        new TimedClosureExecutor(default_timeout, entry, closurePtr, repeating);
+    return executor;
+}
+
+SEQ_FUNC void
+seq_photon_timed_closure_executor_free(TimedClosureExecutor *executor) {
+    delete executor;
+}
+
+SEQ_FUNC photon::Timer *
+seq_photon_timed_closure_executor_get_timer(TimedClosureExecutor *executor) {
+    return executor->getTimer();
+}
+
+SEQ_FUNC photon::Timer *seq_photon_timer_new(uint64_t default_timeout,
+                                             timer_entry entry,
+                                             bool repeating) {
+    auto timer = new photon::Timer(default_timeout, entry, repeating);
+    return timer;
+}
+
+SEQ_FUNC void seq_photon_timer_free(photon::Timer *timer) { delete timer; }
+
+SEQ_FUNC int seq_photon_timer_reset(photon::Timer *timer,
+                                    uint64_t new_timeout) {
+    return timer->reset(new_timeout);
+}
+
+SEQ_FUNC int seq_photon_timer_cancel(photon::Timer *timer) {
+    return timer->cancel();
+}
+
+SEQ_FUNC int seq_photon_timer_stop(photon::Timer *timer) {
+    return timer->stop();
+}
+
+SEQ_FUNC photon::mutex *seq_photon_mutex_new() { return new photon::mutex(); }
+
+SEQ_FUNC void seq_photon_mutex_free(photon::mutex *mu) { delete mu; }
+
+SEQ_FUNC int seq_photon_mutex_lock(photon::mutex *mu, uint64_t timeout) {
+    return mu->lock(timeout);
+}
+
+SEQ_FUNC int seq_photon_mutex_try_lock(photon::mutex *mu) {
+    return mu->try_lock();
+}
+
+SEQ_FUNC void seq_photon_mutex_unlock(photon::mutex *mu) { mu->unlock(); }
+
+SEQ_FUNC photon::spinlock *seq_photon_spinlock_new() {
+    return new photon::spinlock();
+}
+
+SEQ_FUNC void seq_photon_spinlock_free(photon::spinlock *lock) { delete lock; }
+
+SEQ_FUNC int seq_photon_spinlock_lock(photon::spinlock *lock) {
+    return lock->lock();
+}
+
+SEQ_FUNC int seq_photon_spinlock_try_lock(photon::spinlock *lock) {
+    return lock->try_lock();
+}
+
+SEQ_FUNC void seq_photon_spinlock_unlock(photon::spinlock *lock) {
+    lock->unlock();
+}
+
+SEQ_FUNC photon::condition_variable *seq_photon_condition_variable_new() {
+    return new photon::condition_variable();
+}
+
+SEQ_FUNC void
+seq_photon_condition_variable_free(photon::condition_variable *cond) {
+    delete cond;
+}
+
+SEQ_FUNC int
+seq_photon_condition_variable_wait_no_lock(photon::condition_variable *cond,
+                                           uint64_t timeout) {
+    return cond->wait_no_lock(timeout);
+}
+
+SEQ_FUNC photon::thread *
+seq_photon_condition_variable_notify_one(photon::condition_variable *cond) {
+    return cond->notify_one();
+}
+
+SEQ_FUNC int
+seq_photon_condition_variable_notify_all(photon::condition_variable *cond) {
+    return cond->notify_all();
+}
+
+SEQ_FUNC photon::semaphore *seq_photon_semaphore_new() {
+    return new photon::semaphore();
+}
+
+SEQ_FUNC void seq_photon_semaphore_free(photon::semaphore *sem) { delete sem; }
+
+SEQ_FUNC int seq_photon_semaphore_wait(photon::semaphore *sem, uint64_t count,
+                                       uint64_t timeout) {
+    return sem->wait(count, timeout);
+}
+
+SEQ_FUNC int seq_photon_semaphore_signal(photon::semaphore *sem,
+                                         uint64_t count) {
+    return sem->signal(count);
+}
+
+SEQ_FUNC uint64_t seq_photon_semaphore_count(photon::semaphore *sem) {
+    return sem->count();
+}
+
+SEQ_FUNC photon::rwlock *seq_photon_rwlock_new() {
+    return new photon::rwlock();
+}
+
+SEQ_FUNC void seq_photon_rwlock_free(photon::rwlock *rwlock) { delete rwlock; }
+
+// mode: RLOCK / WLOCK
+// constexpr int RLOCK=0x1000;
+// constexpr int WLOCK=0x2000;
+SEQ_FUNC int seq_photon_rwlock_lock(photon::rwlock *rwlock, int mode,
+                                    uint64_t timeout) {
+    return rwlock->lock(mode, timeout);
+}
+
+SEQ_FUNC int seq_photon_rwlock_unlock(photon::rwlock *rwlock) {
+    return rwlock->unlock();
 }

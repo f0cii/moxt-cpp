@@ -3,8 +3,8 @@ package("photonlibos")
     set_description("Write fast and agile C++ programs with Photon!")
     set_license("Apache-2.0")
 
-    -- add_urls("https://github.com/alibaba/PhotonLibOS.git")
-    add_urls("https://github.com/f0cii/PhotonLibOS.git")
+    add_urls("https://github.com/alibaba/PhotonLibOS.git")
+    -- add_urls("https://github.com/f0cii/PhotonLibOS.git")
     
     -- add_urls("https://github.com/alibaba/PhotonLibOS/archive/refs/tags/$(version).tar.gz",
     --           "https://github.com/alibaba/PhotonLibOS.git")

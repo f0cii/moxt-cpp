@@ -72,6 +72,7 @@ void *coro_net_run(void *arg) {
 }
 
 void thread_net_run() {
+    int ret = photon::init(photon::INIT_EVENT_DEFAULT, photon::INIT_IO_DEFAULT);
     logi("thread_net_run");
     AsioIOC::default_pool().run();
     logi("thread_net_run stopped");
@@ -252,7 +253,8 @@ void test_httpclient() {
         start = clock();
         // httpx::Request request;
         std::string path = "/v3/public/time";
-        beast::http::request<beast::http::string_body> request{HttpVerb::get, path, 11};
+        beast::http::request<beast::http::string_body> request{HttpVerb::get,
+                                                               path, 11};
 
         request.set(beast::http::field::host, host);
         request.set(beast::http::field::user_agent, "xt/1.0.1");
