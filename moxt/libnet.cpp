@@ -42,6 +42,8 @@ SEQ_FUNC void seq_websocket_delete(WebSocket *p) {
 
 SEQ_FUNC void seq_websocket_connect(WebSocket *p) { p->Connect(); }
 
+SEQ_FUNC void seq_websocket_disconnect(WebSocket *p) { p->Disconnect(); }
+
 SEQ_FUNC void seq_websocket_send(WebSocket *p, const char *text, size_t len) {
     auto data = std::string(text, len);
     p->Write(data);

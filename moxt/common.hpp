@@ -25,8 +25,8 @@
 #undef min
 #endif
 
-#define USE_FMTLOG 1
-// #define USE_SPDLOG 1
+// #define USE_FMTLOG 1
+#define USE_SPDLOG 1
 
 #if defined(USE_FMTLOG)
 #include <fmtlog/fmtlog.h>

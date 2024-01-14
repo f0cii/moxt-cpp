@@ -45,8 +45,14 @@ template <typename T> void mem_delete(T *obj) {
 SEQ_FUNC int64_t seq_voidptr_to_int(void *p);
 SEQ_FUNC void *seq_int_to_voidptr(int64_t i);
 
-// #define ct_new new
-// #define ct_dup new
-// #define ct_delete delete
+SEQ_FUNC std::atomic<bool> *seq_atomic_bool_new(bool b);
+SEQ_FUNC void seq_atomic_bool_free(std::atomic<bool> *p);
+SEQ_FUNC bool seq_atomic_bool_load(std::atomic<bool> *p);
+SEQ_FUNC void seq_atomic_bool_store(std::atomic<bool> *p, bool v);
+
+SEQ_FUNC std::atomic<int64_t> *seq_atomic_int64_new(int64_t i);
+SEQ_FUNC void seq_atomic_int64_free(std::atomic<int64_t> *p);
+SEQ_FUNC int64_t seq_atomic_int64_load(std::atomic<int64_t> *p);
+SEQ_FUNC void seq_atomic_int64_store(std::atomic<int64_t> *p, int64_t i);
 
 #endif

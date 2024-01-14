@@ -18,7 +18,7 @@ using float_50 = mp::number<mp::cpp_dec_float<50>>; // 50是小数点后的位�
 
 using cpp_dec_float_50 = boost::multiprecision::cpp_dec_float_50;
 
-// 返回小数位: 0.001 -> 4
+// 返回小数位: 0.0001 -> 4
 int decimalPlaces(double value);
 
 constexpr int64_t FIXED_SCALE = 1000000000000;

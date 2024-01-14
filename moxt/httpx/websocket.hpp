@@ -81,6 +81,7 @@ class WebSocket {
     WebSocket(std::string host, std::string port, std::string path,
               asio::io_context &ioContext, int tls_version = TLS1_3_VERSION);
     void Connect();
+    void Disconnect(bool reconnect = false);
     void Write(std::string const &data);
     // 设置连接回调函数
     void set_on_connect(OnConnectCallback callback) {

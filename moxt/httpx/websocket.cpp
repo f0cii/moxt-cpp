@@ -34,6 +34,7 @@ WebSocket::WebSocket(std::string host, std::string port, std::string path,
 WebSocket::~WebSocket() {
     logd("WebSocket::~WebSocket");
     Disconnect();
+    logd("WebSocket::~WebSocket done");
 }
 
 void WebSocket::Connect() {
@@ -48,7 +49,7 @@ void WebSocket::OnResolve(beast::error_code ec,
     logd("WebSocket::OnResolve");
 
     if (ec) {
-        loge("Can't resolve Discord gateway URL '{}': {} ({})", host,
+        loge("Can't resolve gateway URL '{}': {} ({})", host,
              ec.message(), ec.value());
         Disconnect(true);
         return;
@@ -284,7 +285,7 @@ void WebSocket::OnWrite(beast::error_code ec, size_t bytes_transferred) {
     // logd("WebSocket::OnWrite({:d})", bytes_transferred);
 
     if (ec) {
-        loge("Can't write to Discord websocket gateway: {} ({})", ec.message(),
+        loge("Can't write to websocket gateway: {} ({})", ec.message(),
              ec.value());
 
         // we don't handle reconnects here, as the read handler already does
