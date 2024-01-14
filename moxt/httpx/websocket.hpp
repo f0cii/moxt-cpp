@@ -66,7 +66,6 @@ class WebSocket {
     void OnSslHandshake(beast::error_code ec);
     void OnHandshake(beast::error_code ec);
 
-    void Disconnect(bool reconnect = false);
     void OnClose(beast::error_code ec);
     void OnReconnect(beast::error_code ec);
 
