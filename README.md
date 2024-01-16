@@ -15,6 +15,17 @@ sudo apt install libssl-dev libcurl4-openssl-dev libaio-dev
 xmake -vD
 ```
 
+## 使用 Docker 编译
+docker build -t moxt-cpp -f moxt-cpp.Dockerfile .
+
+编译后运行docker容器
+docker run -it moxt-cpp
+查看编译结果
+cd /root/moxt-cpp/build/linux/x86_64/release
+ls
+将显示如下文件，此so文件即为我们项目编译的最终结果
+libmoxt.so
+
 ## 文档
 
 
