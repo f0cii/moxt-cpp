@@ -16,7 +16,7 @@ jobs:
     - name: Checkout the repository
       uses: actions/checkout@v3
       with:
-        submodules: 'recursive'  # 指定递归子模块
+        submodules: 'recursive'  # Specify recursive submodules
 
     - name: Update submodules
       run: git submodule update --init --recursive
