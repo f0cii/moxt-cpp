@@ -18,6 +18,8 @@ xmake -vD
 ## 使用 Docker 编译
 docker build -t moxt-cpp -f moxt-cpp.Dockerfile .
 
+[![Docker Image CI](https://github.com/f0cii/moxt-cpp/actions/workflows/docker-image.yml/badge.svg)](https://github.com/f0cii/moxt-cpp/actions/workflows/docker-image.yml)
+
 编译后运行docker容器
 docker run -it moxt-cpp
 查看编译结果
