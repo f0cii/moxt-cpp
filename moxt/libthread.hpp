@@ -19,6 +19,8 @@ typedef void (*task_callback)(void *result);
 typedef uint64_t (*timer_entry)();
 typedef uint64_t (*timed_closure_entry)(int64_t c);
 
+typedef void *CLockfreeSPSCRingQueueHandle;
+
 class TimedClosureExecutor {
   public:
     TimedClosureExecutor(uint64_t default_timeout, timed_closure_entry entry,
@@ -151,5 +153,19 @@ SEQ_FUNC int seq_photon_timer_reset(photon::Timer *timer, uint64_t new_timeout);
 SEQ_FUNC int seq_photon_timer_cancel(photon::Timer *timer);
 
 SEQ_FUNC int seq_photon_timer_stop(photon::Timer *timer);
+
+// 创建队列
+SEQ_FUNC CLockfreeSPSCRingQueueHandle seq_lockfree_queue_new();
+
+// 销毁队列
+SEQ_FUNC void seq_lockfree_queue_free(CLockfreeSPSCRingQueueHandle handle);
+
+// 入队操作
+SEQ_FUNC bool seq_lockfree_queue_push(CLockfreeSPSCRingQueueHandle handle,
+                                      const iovec *data);
+
+// 出队操作
+SEQ_FUNC bool seq_lockfree_queue_pop(CLockfreeSPSCRingQueueHandle handle,
+                                     iovec *data);
 
 #endif

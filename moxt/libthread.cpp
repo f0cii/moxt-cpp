@@ -7,11 +7,15 @@
 #include <cmath>
 #include <csignal>
 #include <photon/common/alog.h>
+#include <photon/common/lockfree_queue.h>
 #include <photon/io/signal.h>
 #include <photon/net/http/client.h>
 #include <photon/net/socket.h>
-#include <photon/thread/thread-pool.h>
 #include <photon/thread/stack-allocator.h>
+#include <photon/thread/thread-pool.h>
+// #include <boost/lockfree/policies.hpp>
+// #include <boost/lockfree/queue.hpp>
+// #include <boost/lockfree/spsc_queue.hpp>
 
 static photon::WorkPool *work_pool = nullptr;
 
@@ -464,4 +468,36 @@ SEQ_FUNC int seq_photon_rwlock_lock(photon::rwlock *rwlock, int mode,
 
 SEQ_FUNC int seq_photon_rwlock_unlock(photon::rwlock *rwlock) {
     return rwlock->unlock();
+}
+
+struct Event {
+    std::string event_type;
+};
+
+void a() {
+    static constexpr size_t capacity = 16384;
+    LockfreeSPSCRingQueue<iovec, capacity> cqueue;
+}
+
+static constexpr size_t capacity = 16384;
+
+SEQ_FUNC CLockfreeSPSCRingQueueHandle seq_lockfree_queue_new() {
+    return static_cast<CLockfreeSPSCRingQueueHandle>(
+        new LockfreeSPSCRingQueue<iovec, capacity>());
+}
+
+SEQ_FUNC void seq_lockfree_queue_free(CLockfreeSPSCRingQueueHandle handle) {
+    delete static_cast<LockfreeSPSCRingQueue<iovec, capacity> *>(handle);
+}
+
+SEQ_FUNC bool seq_lockfree_queue_push(CLockfreeSPSCRingQueueHandle handle,
+                                      const iovec *data) {
+    auto queue = static_cast<LockfreeSPSCRingQueue<iovec, capacity> *>(handle);
+    return queue->push(*data);
+}
+
+SEQ_FUNC bool seq_lockfree_queue_pop(CLockfreeSPSCRingQueueHandle handle,
+                                     iovec *data) {
+    auto queue = static_cast<LockfreeSPSCRingQueue<iovec, capacity> *>(handle);
+    return queue->pop(*data);
 }
