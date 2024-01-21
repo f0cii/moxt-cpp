@@ -28,10 +28,8 @@ ENV XMAKE_PROFILE_PATH /root/.xmake/profile
 # 将 source 命令添加到 .bashrc
 RUN echo 'source /root/.xmake/profile' >> ~/.bashrc
 
+# 复制当前 Docker 构建上下文中的所有文件到 /root/moxt-cpp 目录
 COPY . /root/moxt-cpp
-
-# 克隆 moxt-cpp 项目
-# RUN git clone https://github.com/f0cii/moxt-cpp.git /root/moxt-cpp
 
 # 安装 moxt-cpp 项目依赖
 RUN apt-get install -y pkg-config e2fslibs-dev zlib1g-dev libssl-dev libcurl4-openssl-dev libaio-dev
