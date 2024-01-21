@@ -28,7 +28,7 @@ add_requires("zlib", {system=false})
 add_requires("openssl", {system=false})
 add_requires("tscns")
 
-add_requires("boost", {configs = {json = true, thread = true, context = true, program_options = true,
+add_requires("boost 1.83.0", {configs = {json = true, thread = true, context = true, program_options = true,
     regex = true, system = true, filesystem = true, date_time = true, url = true, coroutine = true}})
 
 add_requires("abseil")
@@ -42,7 +42,7 @@ if not is_plat("windows") then
 
     -- sudo apt install libssl-dev libcurl4-openssl-dev libaio-dev
     -- sudo apt install -y pkg-config
-    add_requires("photonlibos", {configs = {shared = false, build_shared = false, static = "photon_sole"}})
+    add_requires("photonlibos", {version = "5b92ecc1f2e924b800fad01fa9e1da4d37a22910", configs = {shared = false, build_shared = false, static = "photon_sole"}})
     
     add_requires("libcds")
 end
