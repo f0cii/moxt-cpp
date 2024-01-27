@@ -24,6 +24,8 @@ git pull --recurse-submodules
 git submodule init
 git submodule update --recursive
 
+git submodule update --init --recursive
+
 ## 使用 Docker 编译
 docker build -t moxt-cpp -f moxt-cpp.Dockerfile .
 
