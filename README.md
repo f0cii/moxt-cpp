@@ -26,9 +26,7 @@ git clone --recursive https://github.com/f0cii/moxt-cpp.git
 
 ## Update the Code
 git pull --recurse-submodules
-<<<<<<< HEAD
 
-<<<<<<< HEAD
 ## Update Submodules
 git submodule update --init --recursive
 
@@ -52,4 +50,12 @@ This project is licensed under the MIT License - see the [LICENSE] file for more
 
 ---
 
+<<<<<<< HEAD
 Disclaimer: This project is for learning and research purposes only and does not constitute any trading or investment advice. Please use this project cautiously for actual trading.
+=======
+**免责声明：** 本项目仅供学习和研究使用，不构成任何交易建议或投资建议。请谨慎使用该项目进行实际交易。
+
+[文档链接]: #  # TODO: 添加文档链接
+[贡献指南]: CONTRIBUTING.md # TODO: 创建贡献指南文件
+[LICENSE]: LICENSE
+>>>>>>> b743c57 (Update README.md)
