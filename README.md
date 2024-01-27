@@ -26,17 +26,13 @@ git clone --recursive https://github.com/f0cii/moxt-cpp.git
 
 ## Update the Code
 git pull --recurse-submodules
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 ## Update Submodules
 git submodule update --init --recursive
 
 ## Compile with Docker
-=======
-git submodule update --init --recursive
-
-## 使用 Docker 编译
->>>>>>> 68d0a20 (增加tulipindicators模块)
 docker build -t moxt-cpp -f moxt-cpp.Dockerfile .
 
 [![Docker Image CI](https://github.com/f0cii/moxt-cpp/actions/workflows/docker-image.yml/badge.svg)](https://github.com/f0cii/moxt-cpp/actions/workflows/docker-image.yml)
