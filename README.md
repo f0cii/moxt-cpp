@@ -15,6 +15,15 @@ sudo apt install libssl-dev libcurl4-openssl-dev libaio-dev
 xmake -vD
 ```
 
+## 克隆项目
+git clone --recursive https://github.com/f0cii/moxt-cpp.git
+
+## 更新代码
+git pull --recurse-submodules
+或者
+git submodule init
+git submodule update --recursive
+
 ## 使用 Docker 编译
 docker build -t moxt-cpp -f moxt-cpp.Dockerfile .
 
