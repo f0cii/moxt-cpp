@@ -20,7 +20,7 @@ git clone --recursive https://github.com/f0cii/moxt-cpp.git
 
 ## 更新代码
 git pull --recurse-submodules
-更新子模块
+## 更新子模块
 git submodule update --init --recursive
 
 ## 使用 Docker 编译
