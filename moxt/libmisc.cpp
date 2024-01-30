@@ -14,6 +14,7 @@
 #include <exception>
 #include <nanobench.h>
 #include <photon/common/identity-pool.h>
+#include <string>
 #include <tuple>
 
 #include <std23/function_ref.h>
@@ -208,18 +209,37 @@ SEQ_FUNC size_t seq_nanoid(char *result) {
 }
 
 // 存储全局对象地址值
-static std::unordered_map<int64_t, int64_t> globalObjectMap;
+static std::unordered_map<int64_t, int64_t> globalIntMap;
 
-SEQ_FUNC void seq_store_object_address(int64_t id, int64_t ptr) {
-    globalObjectMap[id] = ptr;
+SEQ_FUNC void seq_set_global_int(int64_t key, int64_t ptr) {
+    globalIntMap[key] = ptr;
 }
 
-SEQ_FUNC int64_t seq_retrieve_object_address(int64_t id) {
-    auto it = globalObjectMap.find(id);
-    if (it != globalObjectMap.end()) {
+SEQ_FUNC int64_t seq_get_global_int(int64_t key) {
+    auto it = globalIntMap.find(key);
+    if (it != globalIntMap.end()) {
         return it->second;
     } else {
         return 0;
+    }
+}
+
+// 存储全局对象地址值
+static std::unordered_map<int64_t, std::string> globalStringMap;
+
+SEQ_FUNC void seq_set_global_string(int64_t key, const char *str,
+                                    size_t strLen) {
+    globalStringMap[key] = std::string(str, strLen);
+}
+
+SEQ_FUNC const char *seq_get_global_string(int64_t key, size_t *strLen) {
+    auto it = globalStringMap.find(key);
+    if (it != globalStringMap.end()) {
+        *strLen = it->second.length();
+        return it->second.c_str();
+    } else {
+        *strLen = 0;
+        return nullptr; // 返回 nullptr 表示未找到对应的字符串
     }
 }
 

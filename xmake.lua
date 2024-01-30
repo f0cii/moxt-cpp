@@ -28,7 +28,7 @@ add_requires("zlib", {system=false})
 add_requires("openssl", {system=false})
 add_requires("tscns")
 
-add_requires("boost 1.83.0", {configs = {json = true, thread = true, context = true, program_options = true,
+add_requires("boost", {configs = {json = true, thread = true, context = true, program_options = true,
     regex = true, system = true, filesystem = true, date_time = true, url = true, coroutine = true}})
 
 add_requires("abseil")
@@ -60,5 +60,18 @@ add_requires("sonic-cpp-local", {alias = 'sonic-cpp'})
 add_requires("toml++")
 add_requires("uwebsockets")
 
+target("tulipindicators")
+	set_kind("static")
+
+	local tulipindicators_dir = "tulipindicators"
+
+	add_includedirs(tulipindicators_dir)
+	add_files(path.join(tulipindicators_dir, "indicators.c"))
+	add_files(path.join(tulipindicators_dir, "candles.c"))
+	add_files(path.join(tulipindicators_dir, "indicators/*.c"))
+	-- add_files(path.join(tulipindicators_dir, "tiamalgamation.c"))
+    add_files(path.join(tulipindicators_dir, "utils/*.c"))
+
 -- include subprojects
+-- includes("*/*xmake.lua")
 includes("*/*xmake.lua")

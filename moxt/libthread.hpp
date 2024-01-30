@@ -154,17 +154,17 @@ SEQ_FUNC int seq_photon_timer_cancel(photon::Timer *timer);
 
 SEQ_FUNC int seq_photon_timer_stop(photon::Timer *timer);
 
-// ´´½¨¶ÓÁĞ
+// åˆ›å»ºé˜Ÿåˆ—
 SEQ_FUNC CLockfreeSPSCRingQueueHandle seq_lockfree_queue_new();
 
-// Ïú»Ù¶ÓÁĞ
+// é”€æ¯é˜Ÿåˆ—
 SEQ_FUNC void seq_lockfree_queue_free(CLockfreeSPSCRingQueueHandle handle);
 
-// Èë¶Ó²Ù×÷
+// å…¥é˜Ÿæ“ä½œ
 SEQ_FUNC bool seq_lockfree_queue_push(CLockfreeSPSCRingQueueHandle handle,
                                       const iovec *data);
 
-// ³ö¶Ó²Ù×÷
+// å‡ºé˜Ÿæ“ä½œ
 SEQ_FUNC bool seq_lockfree_queue_pop(CLockfreeSPSCRingQueueHandle handle,
                                      iovec *data);
 

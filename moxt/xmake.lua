@@ -64,6 +64,21 @@ target("moxt")
         -- add_ldflags("-latomic")	-- for snmalloc
     end
 
+	-- 计算 Tulip Indicators 的根目录
+	local tulipindicators_root = path.join(os.scriptdir(), "../")
+
+	-- 选择 Debug 或 Release 模式
+	local tulipindicators_lib_dir = ""
+	if is_mode("debug") then
+		tulipindicators_lib_dir = path.join(tulipindicators_root, "build/linux/x86_64/debug")
+	else
+		tulipindicators_lib_dir = path.join(tulipindicators_root, "build/linux/x86_64/release")
+	end
+	add_packages("tulipindicators")
+	-- add_linkdirs("~/cpp/moxt-cpp-pro/build/linux/x86_64/release")
+	add_linkdirs(tulipindicators_lib_dir)
+	add_links("tulipindicators")
+
 
 target("moxt_sole")
 	set_kind("static")
@@ -125,3 +140,4 @@ target("moxt_sole")
     add_packages("parallel-hashmap")
 	add_packages("yyjson")
 	add_packages("nanobench")
+	add_packages("tulipindicators")
