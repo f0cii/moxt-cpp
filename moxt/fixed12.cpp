@@ -13,120 +13,19 @@ int decimalPlaces(double value) {
 }
 
 Fixed12 Fixed12::newSV(const std::string_view &s) {
-    size_t period = s.find('.');
-    long long i;
-    long long f;
-    int64_t sign = 1;
-
-    if (period == std::string_view::npos) {
-        i = strtoi(s);
-        if (i < 0) {
-            sign = -1;
-            i = -i;
-        }
-    } else {
-        if (period > 0) {
-            i = strtoi(s.substr(0, period));
-            if (i < 0) {
-                sign = -1;
-                i = -i;
-            }
-        }
-
-        std::string fs(s.substr(period + 1));
-        fs += std::string(MAX_FRAC_BITS - fs.length(), '0');
-        f = strtoi(fs.substr(0, MAX_FRAC_BITS));
-    }
-
-    return Fixed12(sign * (i * FIXED_SCALE + f));
+    int64_t v = fixed12_new_string_view(s);
+    return Fixed12(v);
 }
 
 Fixed12 Fixed12::newS(const std::string &s) {
-    size_t period = s.find('.');
-    long long i;
-    long long f;
-    int64_t sign = 1;
-
-    if (period == std::string_view::npos) {
-        i = strtoi(s);
-        if (i < 0) {
-            sign = -1;
-            i = -i;
-        }
-    } else {
-        if (period > 0) {
-            i = strtoi(s.substr(0, period));
-            if (i < 0) {
-                sign = -1;
-                i = -i;
-            }
-        }
-
-        std::string fs(s.substr(period + 1));
-        fs += std::string(MAX_FRAC_BITS - fs.length(), '0');
-        f = strtoi(fs.substr(0, MAX_FRAC_BITS));
-    }
-
-    return Fixed12(sign * (i * FIXED_SCALE + f));
+    int64_t v = fixed12_new_string_view(s);
+    return Fixed12(v);
 }
 
 std::string Fixed12::toString() const {
     char result[17] = {0};
-
-    int index = 0;
-
-    // Handle negative
-    int64_t intPart = toInt();
-    do {
-        result[index++] = '0' + intPart % 10;
-        intPart /= 10;
-    } while (intPart > 0);
-
-    // Reverse the integer part
-    for (int i = 0, j = index - 1; i < j; i++, j--) {
-        char temp = result[i];
-        result[i] = result[j];
-        result[j] = temp;
-    }
-
-    // Check if there is a decimal point
-
-    int64_t fracPart_ = toFractionalPart();
-
-    if (fracPart_ > 0) {
-        // Add the decimal point
-        result[index++] = '.';
-
-        // Convert the fractional part to a string
-        std::string fracPart = std::to_string(fracPart_);
-        int fracPartLength = fracPart.length();
-        int zerosToAdd = MAX_FRAC_BITS - fracPartLength;
-        if (zerosToAdd > 0) {
-            // Add leading zeros if necessary
-            for (int i = 0; i < zerosToAdd; i++) {
-                result[index++] = '0';
-            }
-        }
-
-        // 计算小数位末尾0个数
-        int fracPartN = 0;
-        for (int i = fracPartLength - 1; i >= 0; i--) {
-            if (fracPart[i] == '0') {
-                fracPartN++;
-            } else {
-                break;
-            }
-        }
-
-        // Copy the non-zero digits of the fractional part
-        for (int i = 0; i < fracPartLength - fracPartN; i++) {
-            result[index++] = fracPart[i];
-        }
-    }
-
-    // Null-terminate
-    result[index] = '\0';
-    return std::string(result);
+    auto n = seq_fixed12_to_string(value_, result);
+    return std::string(result, n);
 }
 
 double roundDouble(double price, double tickSize) {
@@ -203,42 +102,41 @@ SEQ_FUNC fixed12_t seq_fixed12_new_string(const char *cstr, size_t len) {
 }
 
 SEQ_FUNC fixed12_t fixed12_new_string_view(const std::string_view &s) {
-    size_t period = s.find('.');
     long long i;
     long long f;
-    int64_t sign = 1;
+    int64_t sign = (s[0] == '-') ? -1 : 1;
+    std::string_view s_ = (sign == -1) ? s.substr(1) : s;
+    size_t period = s_.find('.');
+
     if (period == std::string_view::npos) {
-        i = strtoi(s);
-        if (i < 0) {
-            sign = -1;
-            i = -i;
-        }
+        i = strtoi(s_);
     } else {
         if (period > 0) {
-            i = strtoi(s.substr(0, period));
-            if (i < 0) {
-                sign = -1;
-                i = -i;
-            }
+            i = strtoi(s_.substr(0, period));
         }
 
-        std::string fs(s.substr(period + 1));
+        std::string fs(s_.substr(period + 1));
         fs += std::string(12 - fs.length(), '0');
         f = strtoi(fs.substr(0, 12));
     }
-    fixed12_t fixed = sign * (i * FIXED_SCALE + f);
-    return fixed;
+    return sign * (i * FIXED_SCALE + f);
 }
 
 SEQ_FUNC size_t seq_fixed12_to_string(const fixed12_t fixed, char *result) {
     int index = 0;
 
-    // Handle negative
-    int64_t intPart = fixed12_int_part(fixed);
+    bool isNegative = fixed < 0;
+    fixed12_t fixed_ = isNegative ? -fixed : fixed;
+    int64_t intPart = fixed12_int_part(fixed_);
+
     do {
         result[index++] = '0' + intPart % 10;
         intPart /= 10;
     } while (intPart > 0);
+
+    if (isNegative) {
+        result[index++] = '-';
+    }
 
     // Reverse the integer part
     for (int i = 0, j = index - 1; i < j; i++, j--) {
@@ -249,7 +147,7 @@ SEQ_FUNC size_t seq_fixed12_to_string(const fixed12_t fixed, char *result) {
 
     // Check if there is a decimal point
 
-    int64_t fracPart_ = fixed12_frac_part(fixed);
+    int64_t fracPart_ = fixed12_frac_part(fixed_);
 
     if (fracPart_ > 0) {
         // Add the decimal point
