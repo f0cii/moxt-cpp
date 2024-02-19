@@ -39,8 +39,10 @@ Run the Docker container after compiling
 docker run -it moxt-cpp
 
 View the compilation results
+```bash
 cd /root/moxt-cpp/build/linux/x86_64/release
 ls
+```
 This will display the following files, the so file is the final result of our project compilation
 libmoxt.so
 
