@@ -16,24 +16,37 @@ xmake -vD
 ```
 
 ## 克隆项目
+```bash
 git clone --recursive https://github.com/f0cii/moxt-cpp.git
+```
 
 ## 更新代码
+```bash
 git pull --recurse-submodules
+```
+
 ## 更新子模块
+```bash
 git submodule update --init --recursive
+```
 
 ## 使用 Docker 编译
+```bash
 docker build -t moxt-cpp -f moxt-cpp.Dockerfile .
+```
 
 [![Docker Image CI](https://github.com/f0cii/moxt-cpp/actions/workflows/docker-image.yml/badge.svg)](https://github.com/f0cii/moxt-cpp/actions/workflows/docker-image.yml)
 
 编译后运行docker容器
+```bash
 docker run -it moxt-cpp
+```
 
 查看编译结果
+```bash
 cd /root/moxt-cpp/build/linux/x86_64/release
 ls
+```
 将显示如下文件，此so文件即为我们项目编译的最终结果
 libmoxt.so
 
