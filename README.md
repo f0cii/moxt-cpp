@@ -22,21 +22,31 @@ xmake -vD
 ```
 
 ## Clone the Project
+```bash
 git clone --recursive https://github.com/f0cii/moxt-cpp.git
+```
 
 ## Update the Code
+```bash
 git pull --recurse-submodules
+```
 
 ## Update Submodules
+```bash
 git submodule update --init --recursive
+```
 
 ## Compile with Docker
+```bash
 docker build -t moxt-cpp -f moxt-cpp.Dockerfile .
+```
 
 [![Docker Image CI](https://github.com/f0cii/moxt-cpp/actions/workflows/docker-image.yml/badge.svg)](https://github.com/f0cii/moxt-cpp/actions/workflows/docker-image.yml)
 
 Run the Docker container after compiling
+```bash
 docker run -it moxt-cpp
+```
 
 View the compilation results
 ```bash
