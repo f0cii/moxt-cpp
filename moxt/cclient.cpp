@@ -9,12 +9,12 @@
 CURLPool *new_curl_pool() {
     auto _ctor = [](photon::net::cURL **ptr) -> int {
         *ptr = new photon::net::cURL();
-        logi("new photon::net::cURL()");
+        logd("new photon::net::cURL()");
         return 0;
     };
     auto _dtor = [](photon::net::cURL *ptr) -> int {
         delete ptr;
-        logi("delete photon::net::cURL");
+        logd("delete photon::net::cURL");
         return 0;
     };
 
@@ -44,6 +44,7 @@ photon::net::cURL *CClient::get_cURL() {
     curl->reset().clear_header();
     // curl->setopt(CURLOPT_SSL_VERIFYHOST, 0L);
     // curl->setopt(CURLOPT_SSL_VERIFYPEER, 0L);
+    // curl->set_nobody();
     return curl;
 };
 
@@ -74,7 +75,7 @@ CHttpResponse CClient::doRequest(const std::string &path,
         client->append_header(a.first, a.second);
     }
 
-    std::string request_url = "https://" + host + path;
+    std::string request_url = baseUrl + path;
 
     int64_t timeout = 5;
     photon::net::StringWriter writer;
@@ -87,14 +88,22 @@ CHttpResponse CClient::doRequest(const std::string &path,
         ret = client->HEAD(request_url.c_str(), &writer, timeout * 1000000);
     } else if (verb == photon::net::http::Verb::POST) {
         // client->append_header("Content-Type", "application/json");
-        // client->append_header("Content-Length", fmt::to_string(body.size()));
+        // Disable Expect: 100-continue
+        client->append_header("Expect", "");
+        // Disable Transfer-Encoding: chunked
+        client->append_header("Transfer-Encoding", "");
+        client->append_header("Content-Length", fmt::to_string(body.size()));
         photon::net::BufReader body_(body.c_str(), body.length());
 
         ret = client->POST(request_url.c_str(), &body_, &writer,
                            timeout * 1000000);
     } else if (verb == photon::net::http::Verb::PUT) {
         // client->append_header("Content-Type", "application/json");
-        // client->append_header("Content-Length", fmt::to_string(body.size()));
+        // Disable Expect: 100-continue
+        client->append_header("Expect", "");
+        // Disable Transfer-Encoding: chunked
+        client->append_header("Transfer-Encoding", "");
+        client->append_header("Content-Length", fmt::to_string(body.size()));
         photon::net::BufReader body_(body.c_str(), body.length());
 
         ret = client->PUT(request_url.c_str(), &body_, &writer,
