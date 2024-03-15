@@ -66,8 +66,8 @@ CHttpResponse CClient::doRequest(const std::string &path,
         client->set_header_container(&resHeaders);
     }
 
-    client->append_header("Host", host);
-    client->append_header("User-Agent", "xt/1.0.1");
+    // client->append_header("Host", host);
+    // client->append_header("User-Agent", "xt/1.0.1");
 
     // logd("--------------header--------------");
     for (auto &a : headers) {
@@ -121,8 +121,9 @@ CHttpResponse CClient::doRequest(const std::string &path,
 
     if (ret != 200) {
         logw("connect to server failed. http response code: {}", ret);
-        return CHttpResponse{
-            500, fmt::format("请求失败 status={} body={}", ret, writer.string)};
+        return CHttpResponse{500,
+                             fmt::format("Request failed status={} body={}",
+                                         ret, writer.string)};
     }
 
     return CHttpResponse{static_cast<uint64_t>(ret), writer.string};
@@ -188,8 +189,9 @@ CClient::doRequestTest(const std::string &path, photon::net::http::Verb verb,
 
     if (ret != 200) {
         logw("connect to server failed. http response code: {}", ret);
-        return CHttpResponse{
-            500, fmt::format("请求失败 status={} body={}", ret, writer.string)};
+        return CHttpResponse{500,
+                             fmt::format("Request failed status={} body={}",
+                                         ret, writer.string)};
     }
 
     return CHttpResponse{static_cast<uint64_t>(ret), writer.string};
@@ -209,7 +211,7 @@ SEQ_FUNC void seq_cclient_free(CClient *client) {
 SEQ_FUNC int64_t seq_cclient_do_request(
     CClient *client, const char *path, size_t path_len, int64_t verb,
     std::map<std::string, std::string> *headers, const char *body,
-    size_t body_len, char *res, size_t *n, bool verbose) {
+    size_t body_len, char *res, size_t res_len, size_t *n, bool verbose) {
     // logd("seq_cclient_do_request");
     std::string reqeustPath = std::string(path, path_len);
     std::string body_(body, body_len);
@@ -228,7 +230,14 @@ SEQ_FUNC int64_t seq_cclient_do_request(
     auto result = client->doRequest(reqeustPath, v, *headers, body_, verbose);
     // logd("seq_cclient_do_request success");
     auto &res_body = result.body;
-    memcpy(res, res_body.c_str(), res_body.length());
-    *n = res_body.length();
+    if (res_body.length() < res_len) {
+        memcpy(res, res_body.c_str(), res_body.length());
+        *n = res_body.length();
+    } else {
+        memcpy(res, res_body.c_str(), res_len);
+        *n = res_len;
+        logw("response body is too long. baseUrl={}, path={}",
+             client->getBaseUrl(), reqeustPath);
+    }
     return result.status_code;
 }

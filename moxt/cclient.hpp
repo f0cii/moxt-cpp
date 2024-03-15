@@ -32,6 +32,9 @@ class CClient {
 
     ~CClient();
 
+    // Get baseUrl
+    string getBaseUrl() { return baseUrl; }
+
     CHttpResponse doRequest(const std::string &path,
                             photon::net::http::Verb verb,
                             std::map<std::string, std::string> &headers,
@@ -59,6 +62,6 @@ SEQ_FUNC void seq_cclient_free(CClient *client);
 SEQ_FUNC int64_t seq_cclient_do_request(
     CClient *client, const char *path, size_t path_len, int64_t verb,
     std::map<std::string, std::string> *headers, const char *body,
-    size_t body_len, char *res, size_t *n, bool verbose);
+    size_t body_len, char *res, size_t res_len, size_t *n, bool verbose);
 
 #endif
