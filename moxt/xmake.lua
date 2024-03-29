@@ -59,6 +59,7 @@ target("moxt")
     add_packages("parallel-hashmap")
 	add_packages("yyjson")
 	add_packages("nanobench")
+    add_packages("redis-plus-plus")
 
 	if not is_plat("windows") then
         -- add_ldflags("-latomic")	-- for snmalloc
@@ -140,4 +141,5 @@ target("moxt_sole")
     add_packages("parallel-hashmap")
 	add_packages("yyjson")
 	add_packages("nanobench")
+    add_packages("redis-plus-plus")
 	add_packages("tulipindicators")

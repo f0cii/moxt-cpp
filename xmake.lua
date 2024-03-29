@@ -1,6 +1,6 @@
 set_project("moxt")
 set_version("1.0.0")
-set_xmakever("2.8.5")
+set_xmakever("2.8.9")
 
 set_encodings("utf-8")
 set_languages("c++20")  -- c++20/c++23
@@ -59,6 +59,7 @@ add_requires("yyjson-local", {alias = 'yyjson'})
 add_requires("sonic-cpp-local", {alias = 'sonic-cpp'})
 add_requires("toml++")
 add_requires("uwebsockets")
+add_requires("redis-plus-plus")
 
 target("tulipindicators")
 	set_kind("static")
