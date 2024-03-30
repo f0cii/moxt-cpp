@@ -116,8 +116,23 @@ SEQ_FUNC fixed12_t fixed12_new_string_view(const std::string_view &s) {
         }
 
         std::string fs(s_.substr(period + 1));
-        fs += std::string(12 - fs.length(), '0');
-        f = strtoi(fs.substr(0, 12));
+        if (fs.length() > MAX_FRAC_BITS) {
+            // 对小数部分进行四舍五入
+            int64_t decimalPart =
+                strtoi(fs.substr(0, MAX_FRAC_BITS + 1)); // 考虑到四舍五入的情况
+            if (decimalPart % 10 >= 5) {
+                fs = std::to_string(decimalPart / 10 +
+                                    1); // 四舍五入并转换回字符串
+            } else {
+                fs = std::to_string(decimalPart / 10); // 四舍五入并转换回字符串
+            }
+            fs = fs.substr(0, MAX_FRAC_BITS); // 确保只取前12位
+        } else {
+            fs += std::string(MAX_FRAC_BITS - fs.length(),
+                              '0'); // 如果小于12位，补零
+        }
+        auto a = fs.substr(0, MAX_FRAC_BITS);
+        f = strtoi(fs.substr(0, MAX_FRAC_BITS));
     }
     return sign * (i * FIXED_SCALE + f);
 }
