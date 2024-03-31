@@ -1,5 +1,6 @@
 #include "libnet.hpp"
 
+#include "common.hpp"
 #include "libthread.hpp"
 #include "moxt/httpx/asio_ioc.hpp"
 #include "moxt/httpx/httpbase.hpp"
@@ -63,6 +64,10 @@ SEQ_FUNC void seq_websocket_set_on_message(WebSocket *p,
                                            OnMessageCallback_t callback) {
     p->set_on_message(callback);
 }
+
+SEQ_FUNC AsioIOC *seq_asio_ioc() { return &AsioIOC::default_pool(); }
+
+SEQ_FUNC void seq_asio_ioc_poll(AsioIOC *ioc) { ioc->poll(); }
 
 void *coro_net_run(void *arg) {
     auto &pool = AsioIOC::default_pool();

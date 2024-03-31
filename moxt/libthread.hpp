@@ -168,4 +168,6 @@ SEQ_FUNC bool seq_lockfree_queue_push(CLockfreeSPSCRingQueueHandle handle,
 SEQ_FUNC bool seq_lockfree_queue_pop(CLockfreeSPSCRingQueueHandle handle,
                                      iovec *data);
 
+typedef void (*sample_callback)();
+
 #endif

@@ -6,6 +6,9 @@
 #include <chrono>
 #include <cmath>
 #include <csignal>
+#include <cstddef>
+#include <cstdio>
+#include <future>
 #include <photon/common/alog.h>
 #include <photon/common/lockfree_queue.h>
 #include <photon/io/signal.h>
@@ -500,4 +503,49 @@ SEQ_FUNC bool seq_lockfree_queue_pop(CLockfreeSPSCRingQueueHandle handle,
                                      iovec *data) {
     auto queue = static_cast<LockfreeSPSCRingQueue<iovec, capacity> *>(handle);
     return queue->pop(*data);
+}
+
+// 定义 sample_callback_
+sample_callback sample_callback_ = nullptr;
+
+SEQ_FUNC void seq_set_sample_callback(sample_callback callback) {
+    sample_callback_ = callback;
+}
+
+SEQ_FUNC void seq_sample_test() {
+    if (sample_callback_) {
+        sample_callback_();
+    }
+}
+
+// entry
+static void *entry(void *arg) {
+    printf("entry\n");
+    if (sample_callback_) {
+        sample_callback_();
+    }
+    printf("entry done\n");
+    return nullptr;
+}
+
+static void e() {
+    printf("e\n");
+    if (sample_callback_) {
+        sample_callback_();
+    }
+    printf("e done\n");
+}
+
+SEQ_FUNC void seq_sample_coro_test() {
+    printf("seq_sample_coro_test\n");
+    if (work_pool == nullptr) {
+        printf("work_pool is nullptr\n");
+        return;
+    }
+    // work_pool->thread_migrate(photon::thread_create(entry, nullptr));
+
+    // 启动std线程(非photon线程)
+    std::thread *t = new std::thread(e);
+    t->join();
+    printf("seq_sample_coro_test done\n");
 }
