@@ -1,5 +1,8 @@
 #include "libc.hpp"
 #include "common.hpp"
+#include <atomic>
+#include <cstdio>
+#include <signal.h>
 
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include <nanobench.h>
@@ -36,4 +39,24 @@ SEQ_FUNC int64_t seq_atomic_int64_load(std::atomic<int64_t> *p) {
 
 SEQ_FUNC void seq_atomic_int64_store(std::atomic<int64_t> *p, int64_t i) {
     p->store(i);
+}
+
+// Define a function pointer type for signal handlers
+typedef void (*SignalHandler)(int);
+
+// Exported function to register a custom signal handler
+// Parameters:
+//   signum: The signal number to catch
+//   handler: The custom signal handler function to be called when the signal is
+//   received
+SEQ_FUNC void seq_register_signal_handler(int signum, SignalHandler handler) {
+    struct sigaction sigAction;
+    sigemptyset(&sigAction.sa_mask);
+    sigAction.sa_flags = 0;
+    sigAction.sa_handler = handler;
+
+    if (sigaction(signum, &sigAction, NULL) == -1) {
+        perror("sigaction");
+        exit(EXIT_FAILURE);
+    }
 }

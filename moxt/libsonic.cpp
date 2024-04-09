@@ -70,7 +70,6 @@ SEQ_FUNC void seq_sonic_json_document_add_string(
     const char *key, size_t keyLen, const char *value, size_t valueLen) {
     auto key_ = std::string_view(key, keyLen);
     auto value_ = std::string_view(value, valueLen);
-    logd("key={} value={}", key_, value_);
     doc->AddMember(key_, NodeType(value_), *alloc);
 }
 
@@ -153,6 +152,69 @@ SEQ_FUNC void seq_sonic_json_document_add_bool_array(
         }
     }
     doc->AddMember(key_, nodeArgs, *alloc);
+}
+
+SEQ_FUNC void seq_sonic_json_document_add_node(
+    sonic_json::Document *doc, sonic_json::Document::Allocator *alloc,
+    const char *key, size_t keyLen, NodeType *node) {
+    auto key_ = std::string_view(key, keyLen);
+    doc->AddMember(key_, *node, *alloc);
+}
+
+SEQ_FUNC NodeType *
+seq_sonic_json_document_find_member(sonic_json::Document *doc,
+                                    sonic_json::Document::Allocator *alloc,
+                                    const char *key, size_t keyLen) {
+    auto key_ = std::string_view(key, keyLen);
+    auto m = doc->FindMember(key_);
+    if (m == doc->MemberEnd()) {
+        return nullptr;
+    } else {
+        return &m->value;
+    }
+}
+
+SEQ_FUNC NodeType *seq_sonic_json_node_new() {
+    auto *node = new NodeType();
+    return node;
+}
+
+SEQ_FUNC void seq_sonic_json_node_free(NodeType *node) { delete node; }
+
+SEQ_FUNC void seq_sonic_json_node_set_object(NodeType *node) {
+    node->SetObject();
+}
+
+SEQ_FUNC void seq_sonic_json_node_add_string(
+    NodeType *node, sonic_json::Document::Allocator *alloc, const char *key,
+    size_t keyLen, const char *value, size_t valueLen) {
+    auto key_ = std::string_view(key, keyLen);
+    auto value_ = std::string_view(value, valueLen);
+    node->AddMember(key_, NodeType(value_), *alloc);
+}
+
+SEQ_FUNC void
+seq_sonic_json_node_add_int(NodeType *node,
+                            sonic_json::Document::Allocator *alloc,
+                            const char *key, size_t keyLen, int64_t value) {
+    auto key_ = std::string_view(key, keyLen);
+    node->AddMember(key_, NodeType(value), *alloc);
+}
+
+SEQ_FUNC void
+seq_sonic_json_node_add_double(NodeType *node,
+                               sonic_json::Document::Allocator *alloc,
+                               const char *key, size_t keyLen, double value) {
+    auto key_ = std::string(key, keyLen);
+    node->AddMember(key_, NodeType(value), *alloc);
+}
+
+SEQ_FUNC void
+seq_sonic_json_node_add_bool(NodeType *node,
+                             sonic_json::Document::Allocator *alloc,
+                             const char *key, size_t keyLen, bool value) {
+    auto key_ = std::string_view(key, keyLen);
+    node->AddMember(key_, NodeType(value), *alloc);
 }
 
 SEQ_FUNC size_t seq_sonic_json_document_to_string(sonic_json::Document *doc,

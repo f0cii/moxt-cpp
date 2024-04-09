@@ -30,6 +30,7 @@
 #include <openssl/err.h>
 #include <openssl/opensslv.h>
 // #include <snmalloc/override/new.cc>
+#include "moxt/utils/snowflake.hpp"
 #include <atomic>
 #include <parallel_hashmap/phmap.h>
 #include <snmalloc/snmalloc.h>
@@ -207,6 +208,16 @@ SEQ_FUNC size_t seq_nanoid(char *result) {
     result[n] = '\0';
     return n;
 }
+
+Snowflake &GetSnowflakeInstance() {
+    static Snowflake inst = [] {
+        Snowflake::initWorkerId();
+        return Snowflake();
+    }();
+    return inst;
+}
+
+SEQ_FUNC int64_t seq_snowflake_id() { return GetSnowflakeInstance().getId(); }
 
 // 存储全局对象地址值
 static std::unordered_map<int64_t, int64_t> globalIntMap;
