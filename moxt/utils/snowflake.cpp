@@ -41,14 +41,15 @@ uint32_t ipToWorkerId(const std::string &ipAddress) {
             ++it;
         }
     }
-    return workerId;
+    // Ensure workerId is within range [0, 1023]
+    return workerId % 1024;
 }
 
 bool Snowflake::initWorkerId() {
     const std::string &ip = getLocalIp();
-    logi("local ip: {}", ip);
+    // logi("local ip: {}", ip);
     workerId_ = ipToWorkerId(ip);
-    logi("WorkerId init success: {}", workerId_);
+    // logi("WorkerId init success: {}", workerId_);
     return true;
 }
 

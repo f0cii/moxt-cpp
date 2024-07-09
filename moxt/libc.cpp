@@ -7,6 +7,16 @@
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include <nanobench.h>
 
+#ifdef __linux
+#include <sys/types.h>
+#include <unistd.h>
+#elif _WIN32
+#include <windows.h>
+#elif __APPLE__
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
 SEQ_FUNC int64_t seq_voidptr_to_int(void *p) {
     return reinterpret_cast<int64_t>(p);
 }
@@ -59,4 +69,15 @@ SEQ_FUNC void seq_register_signal_handler(int signum, SignalHandler handler) {
         perror("sigaction");
         exit(EXIT_FAILURE);
     }
+}
+
+SEQ_FUNC int64_t seq_thread_id() {
+#ifdef __linux
+    pid_t threadId = gettid();
+#elif _WIN32
+    DWORD threadId = GetCurrentThreadId();
+#elif __APPLE__
+    pid_t threadId = gettid();
+#endif
+    return threadId;
 }

@@ -29,9 +29,7 @@
 #include "moxt/utils/cast.hpp"
 #include <openssl/err.h>
 #include <openssl/opensslv.h>
-// #include <snmalloc/override/new.cc>
 #include "moxt/utils/snowflake.hpp"
-#include <atomic>
 #include <parallel_hashmap/phmap.h>
 #include <snmalloc/snmalloc.h>
 

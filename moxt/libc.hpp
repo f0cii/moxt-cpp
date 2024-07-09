@@ -3,6 +3,7 @@
 
 #include "common.hpp"
 #include <snmalloc/snmalloc.h>
+#include <thread>
 
 using namespace snmalloc;
 
@@ -54,5 +55,7 @@ SEQ_FUNC std::atomic<int64_t> *seq_atomic_int64_new(int64_t i);
 SEQ_FUNC void seq_atomic_int64_free(std::atomic<int64_t> *p);
 SEQ_FUNC int64_t seq_atomic_int64_load(std::atomic<int64_t> *p);
 SEQ_FUNC void seq_atomic_int64_store(std::atomic<int64_t> *p, int64_t i);
+// 获取线程id
+SEQ_FUNC int64_t seq_thread_id();
 
 #endif
