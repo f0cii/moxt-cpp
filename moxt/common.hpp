@@ -31,6 +31,10 @@
 #if defined(USE_FMTLOG)
 #include <fmtlog/fmtlog.h>
 #elif defined(USE_SPDLOG)
+
+#define SPDLOG_LEVEL_NAMES                                                     \
+    { "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL", "" }
+
 #include <spdlog/spdlog.h>
 #define logd spdlog::debug
 #define logi spdlog::info

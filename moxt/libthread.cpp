@@ -499,10 +499,43 @@ SEQ_FUNC bool seq_lockfree_queue_push(CLockfreeSPSCRingQueueHandle handle,
     return queue->push(*data);
 }
 
+SEQ_FUNC bool seq_lockfree_queue_push_data(CLockfreeSPSCRingQueueHandle handle,
+                                           const void *data, size_t len) {
+    auto queue = static_cast<LockfreeSPSCRingQueue<iovec, capacity> *>(handle);
+    
+    // 分配新的内存
+    char* buffer = new char[len];
+    memcpy(buffer, data, len);
+
+    iovec iov{buffer, len};
+    if (!queue->push(iov)) {
+        delete[] buffer;
+        return false;
+    }
+    return true;
+}
+
 SEQ_FUNC bool seq_lockfree_queue_pop(CLockfreeSPSCRingQueueHandle handle,
                                      iovec *data) {
     auto queue = static_cast<LockfreeSPSCRingQueue<iovec, capacity> *>(handle);
     return queue->pop(*data);
+}
+
+SEQ_FUNC bool seq_lockfree_queue_pop_data(CLockfreeSPSCRingQueueHandle handle,
+                                          void *output, size_t *len) {
+    auto queue = static_cast<LockfreeSPSCRingQueue<iovec, capacity> *>(handle);
+    iovec iov;
+    auto ok = queue->pop(iov);
+    if (ok) {
+        memcpy(output, iov.iov_base, iov.iov_len);
+        *len = iov.iov_len;
+
+        // 释放之前分配的内存
+        delete[] static_cast<char*>(iov.iov_base);
+    } else {
+        *len = 0;
+    }
+    return ok;
 }
 
 // 定义 sample_callback_

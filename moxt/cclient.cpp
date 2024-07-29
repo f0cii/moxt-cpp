@@ -119,12 +119,12 @@ CHttpResponse CClient::doRequest(const std::string &path,
         }
     }
 
-    if (ret != 200) {
-        logw("connect to server failed. http response code: {}", ret);
-        return CHttpResponse{500,
-                             fmt::format("Request failed status={} body={}",
-                                         ret, writer.string)};
-    }
+    // if (ret == 500) {
+    //     logw("connect to server failed. http response code: {}", ret);
+    //     return CHttpResponse{500,
+    //                          fmt::format("Request failed status={} body={}",
+    //                                      ret, writer.string)};
+    // }
 
     return CHttpResponse{static_cast<uint64_t>(ret), writer.string};
 }

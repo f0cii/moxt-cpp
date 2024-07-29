@@ -1,7 +1,10 @@
 #include "liblog.hpp"
 #include "libthread.hpp"
+#include "spdlog/async.h"
 #include "spdlog/common.h"
-// #include "spdlog/common.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/rotating_file_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include <absl/strings/match.h>
 #include <climits>
 #include <photon/common/alog.h>
@@ -62,6 +65,26 @@ SEQ_FUNC void seq_init_log(uint8_t level, const char *filename,
     init_log(level, filename_);
 }
 
+void set_log_level(uint8_t &level, std::shared_ptr<spdlog::logger> &logger) {
+    switch (level) {
+    case 0:
+        logger->set_level(spdlog::level::debug);
+        break;
+    case 1:
+        logger->set_level(spdlog::level::info);
+        break;
+    case 2:
+        logger->set_level(spdlog::level::warn);
+        break;
+    case 3:
+        logger->set_level(spdlog::level::err);
+        break;
+    case 4:
+        logger->set_level(spdlog::level::off);
+        break;
+    }
+}
+
 void init_log(uint8_t level, const std::string &filename) {
 #if defined(USE_FMTLOG)
     auto logLevel = static_cast<fmtlog::LogLevel>(level);
@@ -74,24 +97,28 @@ void init_log(uint8_t level, const std::string &filename) {
     work_pool->thread_migrate(photon::thread_create(coro_log_run, nullptr),
                               -1UL);
 #elif defined(USE_SPDLOG)
-    switch (level) {
-    case 0:
-        spdlog::set_level(spdlog::level::debug);
-        break;
-    case 1:
-        spdlog::set_level(spdlog::level::info);
-        break;
-    case 2:
-        spdlog::set_level(spdlog::level::warn);
-        break;
-    case 3:
-        spdlog::set_level(spdlog::level::err);
-        break;
-    case 4:
-        spdlog::set_level(spdlog::level::off);
-        break;
+    // spdlog::init_thread_pool(8192, 1);
+    // std::string pattern = "%Y-%m-%d %H:%M:%S.%e [%l] [%t]: %v";
+    std::string pattern = "%Y-%m-%d %H:%M:%S.%e %l [%t]: %v";
+    // [%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v"
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    console_sink->set_pattern(pattern);
+    std::vector<spdlog::sink_ptr> sinks{console_sink};
+    if (!filename.empty()) {
+        auto rotating_sink =
+            std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+                filename, 1024 * 1024 * 10, 3);
+        rotating_sink->set_pattern(pattern);
+        sinks.push_back(rotating_sink);
     }
-
+    // auto logger = std::make_shared<spdlog::async_logger>(
+    //     "mylogger", sinks.begin(), sinks.end(), spdlog::thread_pool(),
+    //     spdlog::async_overflow_policy::block);
+    auto logger = std::make_shared<spdlog::logger>("mylogger", sinks.begin(),
+                                                   sinks.end());
+    set_log_level(level, logger);
+    spdlog::set_default_logger(logger);
+    // spdlog::register_logger(logger);
 #else
     auto logLevel = static_cast<quill::LogLevel>(level);
     quill::get_logger()->set_log_level(logLevel); // quill::LogLevel::TraceL1

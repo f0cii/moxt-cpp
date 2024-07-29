@@ -164,9 +164,15 @@ SEQ_FUNC void seq_lockfree_queue_free(CLockfreeSPSCRingQueueHandle handle);
 SEQ_FUNC bool seq_lockfree_queue_push(CLockfreeSPSCRingQueueHandle handle,
                                       const iovec *data);
 
+SEQ_FUNC bool seq_lockfree_queue_push_data(CLockfreeSPSCRingQueueHandle handle,
+                                           const void *data, size_t len);
+
 // 出队操作
 SEQ_FUNC bool seq_lockfree_queue_pop(CLockfreeSPSCRingQueueHandle handle,
                                      iovec *data);
+
+SEQ_FUNC bool seq_lockfree_queue_pop_data(CLockfreeSPSCRingQueueHandle handle,
+                                          void *output, size_t *len);
 
 typedef void (*sample_callback)();
 
