@@ -17,4 +17,10 @@ SEQ_FUNC const char *seq_get_string_in_cache(int64_t key, size_t *resultLen);
 
 SEQ_FUNC bool seq_free_string_in_cache(int64_t key);
 
+SEQ_FUNC void *seq_new_crate_limiter(int maxCount, uint64_t windowSize);
+
+SEQ_FUNC bool seq_crate_limiter_allow_and_record_request(void *ptr);
+
+SEQ_FUNC void seq_delete_crate_limiter(void *ptr);
+
 #endif

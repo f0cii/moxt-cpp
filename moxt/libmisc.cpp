@@ -1,4 +1,5 @@
 #include "libmisc.hpp"
+#include "common.hpp"
 #include "libc.hpp"
 #include "moxt/utils/floatutil.hpp"
 #include "photon/common/callback.h"
@@ -26,10 +27,11 @@
 #include <execinfo.h>
 #include <iostream>
 
+#include "moxt/utils/c_rate_limiter.hpp"
 #include "moxt/utils/cast.hpp"
+#include "moxt/utils/snowflake.hpp"
 #include <openssl/err.h>
 #include <openssl/opensslv.h>
-#include "moxt/utils/snowflake.hpp"
 #include <parallel_hashmap/phmap.h>
 #include <snmalloc/snmalloc.h>
 
@@ -413,4 +415,19 @@ SEQ_FUNC bool seq_free_string_in_cache(int64_t key) {
         return true;
     }
     return false;
+}
+
+// CRateLimiter
+SEQ_FUNC void *seq_new_crate_limiter(int maxCount, uint64_t windowSize) {
+    return new CRateLimiter(maxCount, windowSize);
+}
+
+SEQ_FUNC bool seq_crate_limiter_allow_and_record_request(void *ptr) {
+    CRateLimiter *p = static_cast<CRateLimiter *>(ptr);
+    return p->allowAndRecordRequest();
+}
+
+SEQ_FUNC void seq_delete_crate_limiter(void *ptr) {
+    CRateLimiter *p = static_cast<CRateLimiter *>(ptr);
+    delete p;
 }
