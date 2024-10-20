@@ -3,10 +3,10 @@ package("fmtlog-local")
     set_description("fmtlog is a performant fmtlib-style logging library with latency in nanoseconds.")
     set_license("MIT")
 
-    -- add_urls("https://github.com/MengRao/fmtlog/archive/refs/tags/$(version).tar.gz",
-    --          "https://github.com/MengRao/fmtlog.git")
-    -- add_versions("v2.1.2", "d286184e04c3c3286417873dd2feac524c53babc6cd60f10179aa5b10416ead7")
-    add_urls("https://github.com/numenresearch/fmtlog.git")
+    add_urls("https://github.com/MengRao/fmtlog/archive/refs/tags/$(version).tar.gz",
+             "https://github.com/MengRao/fmtlog.git")
+    add_versions("v2.1.2", "d286184e04c3c3286417873dd2feac524c53babc6cd60f10179aa5b10416ead7")
+    -- add_urls("https://github.com/numenresearch/fmtlog.git")
 
     -- add_deps("cmake", "fmt")
     add_deps("fmt", {configs = {header_only = true}})

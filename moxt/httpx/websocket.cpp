@@ -1,6 +1,7 @@
 #include "websocket.hpp"
 
-void on_connect_null(WebSocket *ws) {}
+void on_connected_null(WebSocket *ws) {}
+void on_BeforeReconnectNull(WebSocket *ws) {}
 void on_heartbeat_null(WebSocket *ws) {}
 void on_message_null(WebSocket *ws, const char *data, size_t len) {
     logd("on_message_null: {}", std::string_view(data, len));
@@ -12,7 +13,8 @@ WebSocket::WebSocket(std::string host, std::string port, std::string path,
       _ioContext(ioContext), _resolver(asio::make_strand(_ioContext)),
       _sslContext(asio::ssl::context::tlsv12_client),
       _reconnectTimer(_ioContext), m_HeartbeatTimer(_ioContext),
-      m_HeartbeatInterval(), on_connect_callback_(on_connect_null),
+      m_HeartbeatInterval(), on_connected_callback_(on_connected_null),
+      beforeReconnectCallback_(on_BeforeReconnectNull),
       on_heartbeat_callback_(on_heartbeat_null),
       on_message_callback_(on_message_null) {
     // logd("WebSocket::WebSocket");
@@ -49,8 +51,8 @@ void WebSocket::OnResolve(beast::error_code ec,
     logd("WebSocket::OnResolve");
 
     if (ec) {
-        loge("Can't resolve gateway URL '{}': {} ({})", host,
-             ec.message(), ec.value());
+        loge("Can't resolve gateway URL '{}': {} ({})", host, ec.message(),
+             ec.value());
         Disconnect(true);
         return;
     }
@@ -129,10 +131,11 @@ void WebSocket::OnSslHandshake(beast::error_code ec) {
 
     // set a decorator to change the User-Agent of the handshake
     _websocket->set_option(beast::websocket::stream_base::decorator(
-        [](beast::websocket::request_type &req) {
-            req.set(beast::http::field::user_agent,
-                    std::string(BOOST_BEAST_VERSION_STRING) +
-                        " xt-connector");
+        [this](beast::websocket::request_type &req) {
+            // req.set(beast::http::field::user_agent,
+            //         std::string(BOOST_BEAST_VERSION_STRING) +
+            //             " xt-connector");
+            this->SetHeaders(req);
         }));
 
     _websocket->async_handshake(
@@ -158,12 +161,20 @@ void WebSocket::OnHandshake(beast::error_code ec) {
     Read();
 
     // 触发连接回调
-    // if (on_connect_callback_ != nullptr) {
-    on_connect_callback_(this);
-    // }
+    on_connected_callback_(this);
 
     m_HeartbeatInterval = std::chrono::seconds(10);
     DoHeartbeat({});
+}
+
+void WebSocket::SetHeaders(beast::websocket::request_type &req) {
+    req.set(beast::http::field::user_agent,
+            std::string(BOOST_BEAST_VERSION_STRING) + "echo");
+    // 添加Headers
+    for (const auto &header : currentHeaders_.headers) {
+        printf("header: %s %s\n", header.first.c_str(), header.second.c_str());
+        req.set(header.first, header.second);
+    }
 }
 
 void WebSocket::Disconnect(bool reconnect /*= false*/) {
@@ -215,6 +226,11 @@ void WebSocket::OnReconnect(beast::error_code ec) {
     }
 
     ++_reconnectCount;
+
+    // 在重连之前调用回调
+    // printf("beforeReconnectCallback_ %p\n", this);
+    beforeReconnectCallback_(this);
+
     Connect();
 }
 

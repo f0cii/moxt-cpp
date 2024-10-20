@@ -2,7 +2,6 @@
 #define MOXT_CCLIENT_HPP
 
 #include "common.hpp"
-#include "moxt/httpx/clientpool.hpp"
 #include "moxt/httpx/httpbase.hpp"
 #include "moxt/httpx/httpclient.hpp"
 #include <photon/common/identity-pool.h>

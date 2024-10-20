@@ -217,6 +217,14 @@ seq_sonic_json_node_add_bool(NodeType *node,
     node->AddMember(key_, NodeType(value), *alloc);
 }
 
+SEQ_FUNC void
+seq_sonic_json_node_add_node(NodeType *node,
+                             sonic_json::Document::Allocator *alloc,
+                             const char *key, size_t keyLen, NodeType *valueNode) {
+    auto key_ = std::string_view(key, keyLen);
+    node->AddMember(key_, *valueNode, *alloc);
+}
+
 SEQ_FUNC size_t seq_sonic_json_document_to_string(sonic_json::Document *doc,
                                                   char *result) {
     auto s = sonic_json_to_string(doc);

@@ -8,6 +8,7 @@ enum NetDriverType { STD_THREAD = 0, PHOTON = 1 };
 class WebSocket;
 
 typedef void (*OnConnectCallback_t)(WebSocket *ws);
+typedef void (*OnBeforeReconnectCallback_t)(WebSocket *ws);
 typedef void (*OnHeartbeatCallback_t)(WebSocket *ws);
 typedef void (*OnMessageCallback_t)(WebSocket *ws, const char *data, size_t len);
 

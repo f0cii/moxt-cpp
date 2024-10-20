@@ -1,10 +1,13 @@
 #include "liblog.hpp"
 #include "libthread.hpp"
+#include <cstdio>
+#if defined(USE_SPDLOG)
 #include "spdlog/async.h"
 #include "spdlog/common.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
+#endif
 #include <absl/strings/match.h>
 #include <climits>
 #include <photon/common/alog.h>
@@ -65,6 +68,7 @@ SEQ_FUNC void seq_init_log(uint8_t level, const char *filename,
     init_log(level, filename_);
 }
 
+#if defined(USE_SPDLOG)
 void set_log_level(uint8_t &level, std::shared_ptr<spdlog::logger> &logger) {
     switch (level) {
     case 0:
@@ -84,18 +88,38 @@ void set_log_level(uint8_t &level, std::shared_ptr<spdlog::logger> &logger) {
         break;
     }
 }
+#endif
 
 void init_log(uint8_t level, const std::string &filename) {
 #if defined(USE_FMTLOG)
     auto logLevel = static_cast<fmtlog::LogLevel>(level);
     fmtlog::setLogLevel(logLevel);
+    std::string logLevelStr;
+    switch (level) {
+    case fmtlog::LogLevel::DBG:
+        logLevelStr = "DBG";
+        break;
+    case fmtlog::LogLevel::INF:
+        logLevelStr = "INF";
+        break;
+    case fmtlog::LogLevel::WRN:
+        logLevelStr = "WRN";
+        break;
+    case fmtlog::LogLevel::ERR:
+        logLevelStr = "ERR";
+        break;
+    }
+
+    // fmt::print("Set log level to {}\n", logLevelStr);
+
     if (!filename.empty()) {
         fmtlog::setLogFile(filename.c_str(), false);
     }
     // fmtlog::setLogCB(logcb, logLevel);
-    auto work_pool = seq_photon_work_pool();
-    work_pool->thread_migrate(photon::thread_create(coro_log_run, nullptr),
-                              -1UL);
+    // auto work_pool = seq_photon_work_pool();
+    // work_pool->thread_migrate(photon::thread_create(coro_log_run, nullptr),
+    //                           -1UL);
+    fmtlog::startPollingThread(1);
 #elif defined(USE_SPDLOG)
     // spdlog::init_thread_pool(8192, 1);
     // std::string pattern = "%Y-%m-%d %H:%M:%S.%e [%l] [%t]: %v";

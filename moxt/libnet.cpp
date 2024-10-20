@@ -23,6 +23,8 @@ using namespace photon::net::http;
 
 SEQ_FUNC void seq_asio_run() { AsioIOC::default_pool().run(); }
 
+SEQ_FUNC std::thread *seq_asio_run_ex(AsioIOC *ioc, int bindCpu, bool poll);
+
 SEQ_FUNC void seq_asio_poll() { AsioIOC::default_pool().poll(); }
 
 SEQ_FUNC void seq_asio_poll_one() { AsioIOC::default_pool().poll_one(); }
@@ -43,6 +45,12 @@ SEQ_FUNC void seq_websocket_delete(WebSocket *p) {
 
 SEQ_FUNC void seq_websocket_connect(WebSocket *p) { p->Connect(); }
 
+SEQ_FUNC void
+seq_websocket_set_headers(WebSocket *p,
+                          std::map<std::string, std::string> *headers) {
+    p->SetHeaders(*headers);
+}
+
 SEQ_FUNC void seq_websocket_disconnect(WebSocket *p) { p->Disconnect(); }
 
 SEQ_FUNC void seq_websocket_send(WebSocket *p, const char *text, size_t len) {
@@ -50,24 +58,80 @@ SEQ_FUNC void seq_websocket_send(WebSocket *p, const char *text, size_t len) {
     p->Write(data);
 }
 
-SEQ_FUNC void seq_websocket_set_on_connect(WebSocket *p,
-                                           OnConnectCallback_t callback) {
-    p->set_on_connect(callback);
+SEQ_FUNC void seq_websocket_set_on_connected(WebSocket *p,
+                                             OnConnectCallback_t callback) {
+    p->SetOnConnected(callback);
+}
+
+SEQ_FUNC void
+seq_websocket_set_on_before_reconnect(WebSocket *p,
+                                   OnBeforeReconnectCallback_t callback) {
+    p->SetBeforeReconnectCallback(callback);
 }
 
 SEQ_FUNC void seq_websocket_set_on_heartbeat(WebSocket *p,
                                              OnHeartbeatCallback_t callback) {
-    p->set_on_heartbeat(callback);
+    p->SetOnHeartbeat(callback);
 }
 
 SEQ_FUNC void seq_websocket_set_on_message(WebSocket *p,
                                            OnMessageCallback_t callback) {
-    p->set_on_message(callback);
+    p->SetOnMessage(callback);
 }
 
 SEQ_FUNC AsioIOC *seq_asio_ioc() { return &AsioIOC::default_pool(); }
 
 SEQ_FUNC void seq_asio_ioc_poll(AsioIOC *ioc) { ioc->poll(); }
+
+std::thread *createBackgroundThread(void (*func)(AsioIOC *), AsioIOC *ioc,
+                                    int bindCpu = -1) {
+    // 创建线程
+    std::thread *t = new std::thread(func, ioc);
+
+    // 如果指定了绑定的 CPU 核心
+    if (bindCpu >= 0) {
+        // 获取线程的句柄
+        pthread_t nativeHandle = t->native_handle();
+
+        // 设置 CPU 亲和性
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        CPU_SET(bindCpu, &cpuset);
+
+        // 绑定线程到指定的 CPU 核心
+        if (pthread_setaffinity_np(nativeHandle, sizeof(cpu_set_t), &cpuset) !=
+            0) {
+            std::cerr << "Error setting thread affinity" << std::endl;
+        }
+    }
+
+    // 将线程设置为后台线程
+    t->detach(); // 将线程分离，使其成为后台线程
+
+    return t; // 返回线程对象（虽然此时线程已分离，无法再 join）
+}
+
+void _asio_run(AsioIOC *ioc) {
+    logi("_asio_run");
+    ioc->run();
+    logi("_asio_run stopped");
+}
+
+void _asio_run_poll(AsioIOC *ioc) {
+    logi("_asio_run");
+    while (true) {
+        ioc->poll();
+    }
+    logi("_asio_run stopped");
+}
+
+SEQ_FUNC std::thread *seq_asio_run_ex(AsioIOC *ioc, int bindCpu, bool poll) {
+    if (poll) {
+        return createBackgroundThread(_asio_run_poll, ioc, bindCpu);
+    } else {
+        return createBackgroundThread(_asio_run, ioc, bindCpu);
+    }
+}
 
 void *coro_net_run(void *arg) {
     auto &pool = AsioIOC::default_pool();
@@ -79,7 +143,8 @@ void *coro_net_run(void *arg) {
 }
 
 void thread_net_run() {
-    int ret = photon::init(photon::INIT_EVENT_DEFAULT, photon::INIT_IO_DEFAULT);
+    // 启动一个标准线程，并绑定cpu
+
     logi("thread_net_run");
     AsioIOC::default_pool().run();
     logi("thread_net_run stopped");
